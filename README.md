@@ -2,7 +2,7 @@
 
 UNICORN is a startup-themed card game: build a company, raise money, hire talent, sabotage competitors, and be first to a $1B valuation.
 
-This repository contains its responsive website, collectible card gallery, interactive attack/defense demo, and persistent playtest signup form.
+This repository contains its responsive website, collectible card gallery, and interactive attack/defense demo.
 
 ## Run locally
 
@@ -22,15 +22,7 @@ npm run build
 npm run start
 ```
 
-The site uses React, Vinext, and a Cloudflare Worker. Playtest registrations are stored in a D1 database bound as `DB`. The schema and migration are included under `db/` and `drizzle/`.
-
-To initialize the local signup database after building:
-
-```sh
-node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0000_glossy_dorian_gray.sql
-```
-
-Apply that initial migration once per local database. Hosted Sites deployments apply pending migrations automatically.
+The site uses React, Vinext, and a Cloudflare Worker. The playtest CTA is intentionally inactive while the Kickstarter campaign link is being prepared.
 
 ## Hosting
 
@@ -38,7 +30,7 @@ The private hosted website is available at:
 
 https://unicorn-card-game.walkingthetalk1234.chatgpt.site
 
-This repository holds the complete source. GitHub Pages alone cannot run the signup API or D1 database; deployment requires a compatible Worker runtime. The existing Sites project and storage binding are recorded in `.openai/hosting.json`.
+This repository holds the complete source. The existing Sites project is recorded in `.openai/hosting.json`.
 
 ## Prototype status
 

@@ -233,3 +233,14 @@
   .demo-controls .button { white-space: normal; }
   .demo-controls .button svg { flex-shrink: 0; }
 }
+
+.signup-placeholder {
+  min-height: 375px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
+.signup-placeholder .eyebrow { font-size: 10px; }
+.signup-placeholder > p { font-size: 14px; color: var(--muted); line-height: 1.7; margin: 0 0 26px; max-width: 360px; }
+.signup-placeholder .submit-button { opacity: .72; }
