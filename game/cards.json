@@ -284,7 +284,11 @@
       "color": "blue",
       "effect": "Draw 2 cards. Immediately discard down to 7 if needed. Discard this card.",
       "flavor": "Just a casual introduction.",
-      "id": "U20"
+      "id": "U20",
+      "outcome": {
+        "headline": "DRAW 2 CARDS",
+        "caption": "MORE OPTIONS IN YOUR HAND"
+      }
     },
     {
       "key": "poach",
@@ -297,7 +301,11 @@
       "color": "coral",
       "effect": "Take 1 positive-value card from a rival's startup into yours. You may take a shared Employee. Startup identity cards and active effect cards cannot be taken. Discard this.",
       "flavor": "Nice startup. Can we borrow something?",
-      "id": "U21"
+      "id": "U21",
+      "outcome": {
+        "headline": "TAKE 1 CARD",
+        "caption": "FROM A RIVAL'S STARTUP"
+      }
     },
     {
       "key": "offer-they-cant-refuse",
@@ -310,7 +318,11 @@
       "color": "coral",
       "effect": "React when Golden Handcuffs blocks your Poach: ignore that defense and finish the Poach. No more reactions. Cannot counter a defense against Ditch. Discard this.",
       "flavor": "The offer has another zero.",
-      "id": "U22"
+      "id": "U22",
+      "outcome": {
+        "headline": "BREAK THE BLOCK",
+        "caption": "OVERRIDE GOLDEN HANDCUFFS ON POACH"
+      }
     },
     {
       "key": "patent-lawsuit",
@@ -325,7 +337,11 @@
       "flavor": "See you in court. Bring snacks.",
       "activeEffect": "Skip next turn",
       "effectValue": 0,
-      "id": "U23"
+      "id": "U23",
+      "outcome": {
+        "headline": "SKIP 1 TURN",
+        "caption": "TARGET MISSES THEIR NEXT TURN"
+      }
     },
     {
       "key": "steal-customer",
@@ -338,7 +354,11 @@
       "color": "coral",
       "effect": "Take 1 Contract from a rival's startup into yours. Discard this card.",
       "flavor": "Your competitor says hello.",
-      "id": "U24"
+      "id": "U24",
+      "outcome": {
+        "headline": "TAKE 1 CONTRACT",
+        "caption": "FROM A RIVAL'S STARTUP"
+      }
     },
     {
       "key": "founder-scandal",
@@ -351,7 +371,11 @@
       "color": "coral",
       "effect": "Privately look at every card in 1 rival's hand. Return the hand unchanged. Only you see it. Discard this card.",
       "flavor": "Your pitch deck leaked. So did the group chat.",
-      "id": "U25"
+      "id": "U25",
+      "outcome": {
+        "headline": "SEE THEIR HAND",
+        "caption": "PRIVATELY REVEAL ALL THEIR CARDS"
+      }
     },
     {
       "key": "pr-crisis",
@@ -366,7 +390,11 @@
       "flavor": "The apology needs an apology.",
       "activeEffect": "-$75M valuation",
       "effectValue": -75,
-      "id": "U26"
+      "id": "U26",
+      "outcome": {
+        "headline": "-$75M",
+        "caption": "TARGET'S VALUATION WHILE ACTIVE"
+      }
     },
     {
       "key": "hostile-acquisition",
@@ -379,7 +407,11 @@
       "color": "coral",
       "effect": "Take 1 Employee or Growth card from a rival into your startup. You may take a shared Employee. Discard this card.",
       "flavor": "This meeting could have been a threat.",
-      "id": "U27"
+      "id": "U27",
+      "outcome": {
+        "headline": "TAKE 1 ASSET",
+        "caption": "EMPLOYEE OR GROWTH CARD"
+      }
     },
     {
       "key": "golden-handcuffs",
@@ -392,7 +424,11 @@
       "color": "yellow",
       "effect": "React to Poach: cancel it. React to Ditch against you: take both shared Employees and end the venture. Discard this card.",
       "flavor": "Sorry. They're emotionally vested.",
-      "id": "U28"
+      "id": "U28",
+      "outcome": {
+        "headline": "BLOCK OR REVERSE",
+        "caption": "CANCEL POACH / REVERSE DITCH"
+      }
     },
     {
       "key": "best-lawyers",
@@ -405,7 +441,11 @@
       "color": "yellow",
       "effect": "React: cancel Patent Lawsuit, Steal Customer or Hostile Acquisition. Or use 1 card play to remove 1 pending Lawsuit from you or your partner. Discard this.",
       "flavor": "Our hourly rate is a power move.",
-      "id": "U29"
+      "id": "U29",
+      "outcome": {
+        "headline": "BLOCK AN ATTACK",
+        "caption": "LAWSUIT / CUSTOMER THEFT / ACQUISITION"
+      }
     },
     {
       "key": "raise-salary",
@@ -418,7 +458,11 @@
       "color": "yellow",
       "effect": "React: cancel Poach or Hostile Acquisition targeting an Employee belonging to you or your partner. Cannot block Ditch. Discard this.",
       "flavor": "Retention is a strong word.",
-      "id": "U30"
+      "id": "U30",
+      "outcome": {
+        "headline": "KEEP YOUR EMPLOYEE",
+        "caption": "BLOCK POACH OR HOSTILE ACQUISITION"
+      }
     },
     {
       "key": "not-for-sale",
@@ -431,7 +475,11 @@
       "color": "yellow",
       "effect": "React: cancel an Investor targeting you or your partner. No card changes hands and no valuation is added. Discard this and the Investor.",
       "flavor": "Respectfully, absolutely not.",
-      "id": "U31"
+      "id": "U31",
+      "outcome": {
+        "headline": "BLOCK INVESTOR",
+        "caption": "CANCEL THE ENTIRE EXCHANGE"
+      }
     },
     {
       "key": "crisis-pr-team",
@@ -444,7 +492,11 @@
       "color": "yellow",
       "effect": "React: cancel Founder Scandal or PR Crisis. Or use 1 card play to remove 1 active PR Crisis from you or your partner. Discard this.",
       "flavor": "We're workshopping the apology.",
-      "id": "U32"
+      "id": "U32",
+      "outcome": {
+        "headline": "STOP THE CRISIS",
+        "caption": "BLOCK SCANDAL / CANCEL OR CLEAR PR CRISIS"
+      }
     },
     {
       "key": "non-compete",
@@ -457,7 +509,11 @@
       "color": "yellow",
       "effect": "Attach to 1 of your Employees. Automatically cancel the next Poach or Hostile Acquisition targeting it, then discard this. Does not stop Ditch.",
       "flavor": "Please read the extremely fine print.",
-      "id": "U33"
+      "id": "U33",
+      "outcome": {
+        "headline": "PROTECT 1 EMPLOYEE",
+        "caption": "BLOCK THE NEXT POACH OR ACQUISITION"
+      }
     },
     {
       "key": "investor",
@@ -470,7 +526,11 @@
       "color": "violet",
       "effect": "Give a rival this card face-up for +$50M valuation. Take 1 random card from their hidden hand. They must have a card to exchange. The Investor stays in their startup.",
       "flavor": "I believed in you. Five minutes ago.",
-      "id": "U34"
+      "id": "U34",
+      "outcome": {
+        "headline": "TAKE 1 RANDOM CARD",
+        "caption": "GIVE THE TARGET +$50M VALUATION"
+      }
     },
     {
       "key": "joint-venture",
@@ -483,7 +543,11 @@
       "color": "violet",
       "effect": "Choose an unpartnered rival who agrees. Each commits 1 unshared Employee. Both count both Employees. Keep this between them as the venture marker. Only 1 partner per player.",
       "flavor": "Together, until further notice.",
-      "id": "U35"
+      "id": "U35",
+      "outcome": {
+        "headline": "SHARE 2 EMPLOYEES",
+        "caption": "ONE EACH / BOTH COUNT BOTH"
+      }
     },
     {
       "key": "ditch",
@@ -496,7 +560,11 @@
       "color": "coral",
       "effect": "Take both Employees from your Joint Venture and end it. Your valuation stays the same; your partner loses their shared value. If they block Ditch, they take both instead. Discard this.",
       "flavor": "Nothing personal. Extremely personal.",
-      "id": "U36"
+      "id": "U36",
+      "outcome": {
+        "headline": "TAKE BOTH EMPLOYEES",
+        "caption": "END THE VENTURE / PARTNER LOSES SHARED VALUE"
+      }
     },
     {
       "key": "unicorn",

@@ -325,3 +325,14 @@
  .demo-narration { flex-basis: calc(100% - 80px); }
  .demo-controls .button { font-size: 14px; }
 }
+
+/* Tactical effects lead; banking is the secondary choice. */
+.sample-card .effect-art { min-height: 188px; height: auto; padding: 20px 14px; flex-direction: column; gap: 12px; text-align: center; }
+.sample-card .effect-art > svg { width: 32px; height: 32px; flex-shrink: 0; }
+.effect-art > strong { font-family: 'Barlow Condensed', Impact, sans-serif; font-size: 40px; line-height: 1.02; position: relative; z-index: 1; }
+.effect-art > span { font-size: 12px; font-weight: 700; line-height: 1.4; letter-spacing: .2px; position: relative; z-index: 1; }
+.tactic-footer { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; border-top: 1px solid #1b172044; padding-top: 12px; margin-top: auto; font-size: 12px; line-height: 1.4; }
+.tactic-footer > span:last-child { text-align: right; }
+.tactic-footer > span:first-child { opacity: .7; font-size: 12px; }
+.tactic-footer b { white-space: nowrap; }
+@media(max-width: 480px) { .sample-card .effect-art { min-height: 180px; } .effect-art > strong { font-size: 40px; } }

@@ -50,18 +50,28 @@ def front(c,card,x=0,y=0):
     rect(c,10,137,160,37,'ink',5)
     if card['role']=='reference':
         big,label=('$1B','THE FINISH LINE') if card['key']=='unicorn' else ('QUICK RULES','KEEP BESIDE THE TABLE')
+    elif card.get('outcome'):
+        big,label=card['outcome']['headline'],card['outcome']['caption']
     else:
         big=f"+${card['value']}M"
         label='STARTING VALUATION' if card['role']=='startup' else ('VALUATION IN YOUR STARTUP' if card['role']=='asset' else 'VALUATION IF BANKED')
-    text(c,big,18,153,22 if big!='QUICK RULES' else 18,'Display','paper')
-    text(c,label,18,142,6.1,'Bold','paper')
-    heading='HOW TO USE' if card['role'] in ('startup','reference','asset') else ('REACTION FROM YOUR HAND' if card['role']=='reaction' else 'OR PLAY THIS EFFECT')
+    headline_size=28 if card['key']=='pr-crisis' else 22
+    while pdfmetrics.stringWidth(big,'Display',headline_size)>144: headline_size-=.5
+    text(c,big,18,152,headline_size,'Display','paper')
+    label_size=6.1
+    while pdfmetrics.stringWidth(label,'Bold',label_size)>144: label_size-=.1
+    text(c,label,18,142,label_size,'Bold','paper')
+    heading='HOW TO USE' if card['role'] in ('startup','reference','asset') else ('REACTION FROM YOUR HAND' if card['role']=='reaction' else 'PLAY THIS EFFECT')
     text(c,heading,12,122,7,'Bold')
     bottom=para(c,card['effect'],12,114,156,9.1,leading=11.4)
     assert bottom>=32, (card['name'],bottom)
     c.setStrokeColor(C['ink']);c.setLineWidth(.5);c.line(12,28,168,28)
     text(c,'UNICORN',12,14,10,'Display')
-    text(c,'ED.02  /  '+('REFERENCE' if card['role']=='reference' else 'VALUATION ONLY'),62,15,5.8,'Bold')
+    if card.get('outcome'):
+        bank=f"Bank instead: +${card['value']}M"
+        text(c,bank,168-pdfmetrics.stringWidth(bank,'Body',7),15,7,'Body')
+    else:
+        text(c,'ED.02  /  '+('REFERENCE' if card['role']=='reference' else 'VALUATION ONLY'),62,15,5.8,'Bold')
     c.restoreState()
 
 def back(c,x=0,y=0):
@@ -96,7 +106,7 @@ def printable():
     c.showPage();page_header(c,'DECK INDEX','EVERY CARD. EVERY COPY.',2)
     for col,group in enumerate([CARDS[:20],CARDS[20:]]):
         x=36+col*372;y=495
-        text(c,'CARD',x,y,8,'Bold');text(c,'VALUE',x+235,y,8,'Bold');text(c,'COPIES',x+290,y,8,'Bold');y-=19
+        text(c,'CARD',x,y,8,'Bold');text(c,'BANK / BASE',x+235,y,8,'Bold');text(c,'COPIES',x+290,y,8,'Bold');y-=19
         for d in group:
             label=f"{d['id']}  {d['name']}"
             text(c,label,x,y,9,'Body');text(c,'REF' if d['role']=='reference' else f"+${d['value']}M",x+235,y,9,'Bold');text(c,str(d['copies']),x+303,y,9,'Bold');y-=21
@@ -144,23 +154,28 @@ def concept():
     para(c,'Bank a tactic for +$10M, or keep it to attack or defend. A banked card cannot use its effect later. Defenses from hand are free reactions.',40,433,530,9,'Body','paper',11)
     text(c,'NINE CARDS THAT EXPLAIN THE GAME',28,385,17,'Display')
     examples=[
-        ('chief-scientist','Place it face-up for +$125M. It can also be your Employee in a Joint Venture.'),
-        ('poach','Take 1 positive-value card from a rival’s startup into yours. You can take a shared Employee.'),
-        ('investor','Give them this +$50M card. Take 1 random card from their hidden hand.'),
-        ('founder-scandal','Privately see every card in one rival’s hand, then return it unchanged.'),
-        ('joint-venture','Both agree; commit 1 Employee each from your startups. Both count both. One partner each.'),
-        ('ditch','Take both shared Employees. Your value stays the same; your partner loses the shared value.'),
-        ('golden-handcuffs','Cancel Poach. Or block Ditch: the defender gets both Employees instead. The venture ends.'),
-        ('patent-lawsuit','Your target skips their next whole turn, including the draw. Keep this as a reminder; then discard.'),
-        ('pr-crisis','Keep this beside a rival as a −$75M penalty until Crisis PR Team removes it.')]
+        ('chief-scientist','Place in your startup. You may share this Employee in a Joint Venture.'),
+        ('poach','Move a rival’s positive-value card into your startup. Shared Employees count.'),
+        ('investor','Give the target +$50M. Take 1 random card from their hidden hand.'),
+        ('founder-scandal','Privately look at all their cards. Return their hand unchanged.'),
+        ('joint-venture','Both agree and commit 1 Employee each. Both count both Employees.'),
+        ('ditch','Keep both shared Employees. Your value stays; your partner loses theirs.'),
+        ('golden-handcuffs','Cancel Poach. Against Ditch, defender keeps both Employees; the venture ends.'),
+        ('patent-lawsuit','Target skips their next whole turn, including the draw. Then discard this.'),
+        ('pr-crisis','Penalty stays beside the rival until Crisis PR Team removes it.')]
     for i,(key,body) in enumerate(examples):
         d=next(d for d in CARDS if d['key']==key);x=28+(i%3)*190;y=268-(i//3)*114
         rect(c,x,y,176,105,d['color'],6)
-        text(c,d['category'].upper(),x+10,y+92,6.5,'Bold')
-        size=18 if len(d['name'])<17 else 16
-        text(c,d['name'].upper(),x+10,y+73,size,'Display')
-        low=para(c,body,x+10,y+63,156,9,leading=11.1);assert low>=y+19,(key,low,y)
-        text(c,f"+${d['value']}M "+('IN YOUR STARTUP' if d['role']=='asset' else 'IF BANKED'),x+10,y+9,6.7,'Bold')
+        text(c,d['category'].upper(),x+10,y+93,6.5,'Bold')
+        size=16 if len(d['name'])<17 else 14
+        text(c,d['name'].upper(),x+10,y+77,size,'Display')
+        headline=d['outcome']['headline'] if d.get('outcome') else f"+${d['value']}M"
+        hs=23 if key=='pr-crisis' else 20
+        while pdfmetrics.stringWidth(headline,'Display',hs)>156:hs-=.5
+        text(c,headline,x+10,y+56,hs,'Display')
+        low=para(c,body,x+10,y+49,156,8.3,leading=10.2);assert low>=y+16,(key,low,y)
+        bank=f"Bank instead: +${d['value']}M" if d.get('outcome') else 'VALUATION IN YOUR STARTUP'
+        text(c,bank,x+166-pdfmetrics.stringWidth(bank,'Body',6.7),y+7,6.7,'Body')
     rect(c,28,13,556,24,'ink',4)
     text(c,'NO EARLY ELIMINATION. YOUR PARTNER DOES NOT SHARE YOUR WIN.',38,30,8,'Bold','paper')
     text(c,'Early prototype • Timing and balance need playtesting • Full deck includes all defenses and complete rules.',38,20,6.6,'Body','paper')
