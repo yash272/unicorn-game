@@ -47,7 +47,7 @@ def front(c,card,x=0,y=0):
     while len(title_lines(card['name'].upper(),156,size))>2: size-=1
     for i,line in enumerate(title_lines(card['name'].upper(),156,size)):
         text(c,line,12,210-i*(size*.98),size,'Display')
-    rect(c,10,137,160,37,'ink',5)
+    rect(c,10,137,160,44 if card['key']=='pr-crisis' else 37,'ink',5)
     if card['role']=='reference':
         big,label=('$1B','THE FINISH LINE') if card['key']=='unicorn' else ('QUICK RULES','KEEP BESIDE THE TABLE')
     elif card.get('outcome'):

@@ -386,7 +386,7 @@
       "copies": 3,
       "icon": "Siren",
       "color": "coral",
-      "effect": "Place beside a rival's startup as a -$75M valuation penalty. It stays until removed by Crisis PR Team. Its +$10M bank value does not count here.",
+      "effect": "Place beside a rival's startup as a -$75M valuation penalty. It stays until removed by Crisis PR Team.",
       "flavor": "The apology needs an apology.",
       "activeEffect": "-$75M valuation",
       "effectValue": -75,
