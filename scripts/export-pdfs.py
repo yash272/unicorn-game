@@ -70,17 +70,28 @@ def front(c,card,x=0,y=0):
     if card.get('outcome'):
         bank=f"Bank instead: +${card['value']}M"
         text(c,bank,168-pdfmetrics.stringWidth(bank,'Body',7),15,7,'Body')
-    else:
-        text(c,'ED.02  /  '+('REFERENCE' if card['role']=='reference' else 'VALUATION ONLY'),62,15,5.8,'Bold')
+    elif card['role']=='reference':
+        text(c,'REFERENCE',128,15,5.8,'Bold')
     c.restoreState()
 
 def back(c,x=0,y=0):
-    c.saveState();c.translate(x,y);rect(c,0,0,180,252,'ink',9)
-    c.setStrokeColor(C['violet']);c.setLineWidth(1)
-    for d in range(0,4): c.roundRect(10+d*6,10+d*6,160-d*12,232-d*12,7,stroke=1,fill=0)
-    text(c,'BUILD. RAISE.',43,177,20,'Display','paper');text(c,'HIRE. ATTACK.',42,155,20,'Display','paper')
-    text(c,'UNICORN',24,102,41,'Heavy','lime');text(c,'ONE BILLION. ONE WINNER.',38,82,7,'Bold','paper')
-    text(c,'VALUATION-ONLY EDITION',43,47,6,'Bold','violet');c.restoreState()
+    # Restore the original violet orbit design, without edition labels.
+    c.saveState();c.translate(x,y)
+    clip=c.beginPath();clip.roundRect(0,0,180,252,8);c.clipPath(clip,stroke=0,fill=0)
+    rect(c,0,0,180,252,HexColor('#15101D'),8)
+    c.setStrokeColor(C['violet']);c.setLineWidth(.7);c.roundRect(8,8,164,236,5,stroke=1,fill=0)
+    c.setStrokeColor(HexColor('#30233F'))
+    for yy in [0,252]:
+        for rr in [45,65,85,105]:c.circle(90,yy,rr,stroke=1,fill=0)
+    def centered(t,y,font,size,color):
+        c.setFillColor(HexColor(color));c.setFont(font,size);c.drawCentredString(90,y,t)
+    centered('BUILD. RAISE. HIRE. ATTACK.',220,'Bold',6.3,'#AE91FF')
+    c.drawImage(str(SITE/'public/images/card-back-sparkles.png'),67,151,46,46,mask='auto')
+    centered('UNICORN',119,'Heavy',34,'#EDE6DA')
+    centered('FIRST STARTUP TO $1B WINS.',100,'Bold',6.5,'#AE91FF')
+    c.setStrokeColor(HexColor('#59436F'));c.setLineWidth(.5);c.line(34,84,146,84)
+    centered('FRIENDSHIP IS A LIABILITY.',65,'Body',6.4,'#C7B2DD')
+    c.restoreState()
 
 def crop(c,x,y):
     c.setStrokeColor(C['muted']);c.setLineWidth(.35)
