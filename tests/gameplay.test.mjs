@@ -1,10 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import catalog from '../game/cards.json' with { type: 'json' };
-import { freshTable, resolveDemo, valueOf, limitHand, scenarios } from '../game/demo.ts';
+import { freshTable, resolveDemo, valueOf, limitHand, scenarios, passCardsLeft, returnGrowthToHand } from '../game/demo.ts';
 const totals = state => state.players.map(p => valueOf(p, state.venture));
 test('complete deck has 100 playable, 15 startup and 5 reference cards', () => {
-  assert.equal(new Set(catalog.cards.map(c=>c.key)).size,40);
+  assert.equal(new Set(catalog.cards.map(c=>c.key)).size,41);
   for(const [roles,count] of [[['startup'],15],[['reference'],5]]) assert.equal(catalog.cards.filter(c=>roles.includes(c.role)).reduce((n,c)=>n+c.copies,0),count);
   const playable=catalog.cards.filter(c=>!['startup','reference'].includes(c.role));
   assert.equal(playable.reduce((n,c)=>n+c.copies,0),100);
@@ -23,3 +23,45 @@ test('banking adds the printed value and never activates the effect',()=>{for(co
 test('Patent Lawsuit skips one whole turn without drawing or changing valuation',()=>{const pending=resolveDemo('patent-lawsuit','played'),skipped=resolveDemo('patent-lawsuit','skipped');assert.equal(pending.players[2].skipNextTurn,true);assert.equal(skipped.players[2].skipNextTurn,false);assert.equal(skipped.players[2].skipped,true);assert.deepEqual(pending.players[2].hand,skipped.players[2].hand);assert.deepEqual(totals(pending),totals(skipped));assert.equal(resolveDemo('patent-lawsuit','blocked').players[2].skipNextTurn,false);});
 test('PR Crisis adds a persistent 75 penalty and valuation has a zero floor',()=>{const s=resolveDemo('pr-crisis','played');assert.deepEqual(totals(s),[725,550,355,300]);s.players[2].penalties=[-1000];assert.equal(valueOf(s.players[2],s.venture),0);assert.deepEqual(resolveDemo('pr-crisis','blocked').players[2].penalties,[]);});
 test('the strict hand limit rejects missing, duplicate and invalid discards',()=>{const h=[0,1,2,3,4,5,6,7,8];assert.deepEqual(limitHand(h,[1,8]),{hand:[0,2,3,4,5,6,7],discarded:[1,8]});for(const d of [[],[1],[1,1],[1,9],[0.5,1]])assert.throws(()=>limitHand(h,d));assert.deepEqual(limitHand([1,2],[]).hand,[1,2]);});
+
+test('the accepted mix is four Ditch, two Mixer and two Cease & Desist',()=>{
+  const find=key=>catalog.cards.find(c=>c.key===key);
+  assert.equal(find('ditch').copies,4);assert.equal(find('founder-mixer').copies,2);assert.equal(find('cease-and-desist').copies,2);
+  assert.equal(find('hostile-acquisition'),undefined);assert.equal(find('pitch-deck-leak'),undefined);
+  assert.ok(!JSON.stringify(catalog).includes('Hostile Acquisition'));
+  assert.match(find('best-lawyers').effect,/Cease & Desist/);
+});
+test('Cease & Desist returns Growth to hand, with no valuation gain for the attacker',()=>{
+  const before=freshTable('cease-and-desist'),after=resolveDemo('cease-and-desist','played');
+  assert.deepEqual(totals(before),[725,550,430,300]);assert.deepEqual(totals(after),[725,550,305,300]);
+  assert.equal(after.players[2].hand.length,6);assert.ok(after.players[2].hand.some(c=>c.id==='growth-demo'));
+  assert.deepEqual(totals(resolveDemo('cease-and-desist','blocked')),totals(before));
+});
+test('returning Growth enforces the hand cap and rejects Employee targets before mutation',()=>{
+  const p=freshTable('cease-and-desist').players[2];
+  p.hand.push({id:'extra-1',key:'poach'},{id:'extra-2',key:'ditch'});const snapshot=structuredClone(p);
+  assert.throws(()=>returnGrowthToHand(p,'growth-demo'),/discard/);assert.deepEqual(p,snapshot);
+  assert.throws(()=>returnGrowthToHand(p,'scientist',[0]),/Growth/);assert.deepEqual(p,snapshot);
+  const discard=returnGrowthToHand(p,'growth-demo',[0]);assert.equal(p.hand.length,7);assert.equal(discard[0].id,'their-ditch');assert.ok(p.hand.some(c=>c.id==='growth-demo'));
+});
+test('Mixer selections come from the original hands and pass exactly one seat',()=>{
+  const hands=[['a','b'],['c','d'],['e','f'],['g','h']];
+  assert.deepEqual(passCardsLeft(hands,[1,0,1,0]),[['a','g'],['d','b'],['e','c'],['h','f']]);
+  assert.deepEqual(hands,[['a','b'],['c','d'],['e','f'],['g','h']]);
+});
+test('Mixer handles empty hands, wraps around and keeps cards unique for 3–5 players',()=>{
+  for(const n of [3,4,5]){
+    const hands=Array.from({length:n},(_,i)=>i===1?[]:[`${i}a`,`${i}b`]);const choices=hands.map(h=>h.length?0:null);const after=passCardsLeft(hands,choices);
+    assert.deepEqual(after.flat().sort(),hands.flat().sort());assert.equal(after[1].at(-1),'0a');assert.equal(after[2].length,1);assert.equal(after[0].at(-1),`${n-1}a`);
+  }
+  assert.deepEqual(passCardsLeft([[],[],[]],[null,null,null]),[[],[],[]]);
+  assert.throws(()=>passCardsLeft([['a'],[],['b']],[null,null,0]));
+  assert.throws(()=>passCardsLeft([['a'],[],['b']],[0,0,0]));
+});
+test('the Mixer demo passes from the remaining hand and discards Mixer after resolving',()=>{
+  const before=freshTable('founder-mixer'),after=resolveDemo('founder-mixer','played');
+  assert.deepEqual(totals(after),totals(before));assert.equal(after.discarded[0].key,'founder-mixer');
+  assert.ok(!after.players.some(p=>p.hand.some(c=>c.id==='action')));
+  assert.equal(after.players[0].hand.at(-1).id,'fin-pr');assert.equal(after.players[1].hand.at(-1).id,'your-launch');
+  assert.ok(after.players.every(p=>p.hand.length<=7));assert.equal(after.revealedTo,null);
+});

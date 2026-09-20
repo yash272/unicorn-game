@@ -10,12 +10,14 @@ Play a card's effect or bank it face-up for its printed valuation. Banked cards 
 
 Investor gives the opponent a face-up +$50M card in exchange for one random card from their hand. Joint Venture shares one Employee from each startup; both partners count both. Ditch gives both shared Employees to the attacker, preserving their valuation while reducing the partner's. Golden Handcuffs reverses Ditch: the defender keeps both instead.
 
+The 100-card main deck includes 4 Ditch, 2 Founder Mixer and 2 Cease & Desist cards. Founder Mixer passes one hidden card per player to the left simultaneously. Cease & Desist returns a rival’s Growth card to their hand; Best Lawyers in Town can cancel it.
+
 ## Sources and outputs
 
-- `game/cards.json` defines 40 designs and copy counts: 100 main-deck cards, 15 Startup cards, 5 References.
+- `game/cards.json` defines 41 designs and copy counts: 100 main-deck cards, 15 Startup cards, 5 References.
 - `game/rules.json` provides the complete website and PDF rules; `game/RULES.md` is a readable companion.
-- `game/demo.ts` drives seven scripted, mid-game interactive examples. This is not an online multiplayer game.
-- `scripts/export-pdfs.py` uses ReportLab to generate the one-page concept sheet, full 120-card print set with rules, and 40 individual card fronts plus a universal back. Fonts are bundled in `public/fonts/`.
+- `game/demo.ts` drives nine scripted, mid-game interactive examples. This is not an online multiplayer game.
+- `scripts/export-pdfs.py` uses ReportLab to generate the one-page concept sheet, full 120-card print set with rules, and 41 individual card fronts plus a universal back. Fonts are bundled in `public/fonts/`.
 - Generated PDFs are copied to `public/downloads/` for the website and `../output/pdf/` for sharing.
 
 Run `python3 scripts/export-pdfs.py` with ReportLab installed after editing the card catalog or rules. Print the full deck's pages 7–46 at Actual Size, landscape, short-edge duplex. Test the first front/back pair before printing everything.

@@ -29,6 +29,14 @@
     },
     {
       "page": 3,
+      "column": 0,
+      "title": "Founder Mixer: everyone passes",
+      "paragraphs": [
+        "Use one normal card play. After putting Founder Mixer down, everyone with a card in hand secretly chooses 1. Pass all chosen cards face-down to the player on the left simultaneously; choose before receiving. Empty hands pass nothing but can receive a card. Discard Mixer after the pass. It cannot pass itself. No defense blocks this event, and there is no separate event phase."
+      ]
+    },
+    {
+      "page": 3,
       "column": 1,
       "title": "1 / Draw one",
       "paragraphs": [
@@ -105,6 +113,14 @@
       ]
     },
     {
+      "page": 4,
+      "column": 1,
+      "title": "Cease & Desist: back to hand",
+      "paragraphs": [
+        "Choose 1 Growth card in a rival's startup and return it to their hand. They lose that card's valuation immediately and may replay it on their own turn. If their hand exceeds 7, they choose and discard down immediately. Best Lawyers in Town can cancel the attack before anything moves. Discard Cease & Desist after resolving."
+      ]
+    },
+    {
       "page": 5,
       "column": 0,
       "title": "Form a Joint Venture",
@@ -127,7 +143,7 @@
       "column": 0,
       "title": "If someone takes a shared Employee",
       "paragraphs": [
-        "Resolve any eligible defense first. If Poach or Hostile Acquisition succeeds, the attacker takes the chosen Employee. Return the other committed Employee to its original contributor and discard Joint Venture. The partnership ends; recalculate both startups."
+        "Resolve any eligible defense first. If Poach succeeds, the attacker takes the chosen Employee. Return the other committed Employee to its original contributor and discard Joint Venture. The partnership ends; recalculate both startups."
       ]
     },
     {
@@ -178,7 +194,7 @@
       "column": 0,
       "title": "Attached defenses",
       "paragraphs": [
-        "A Non-Compete used for protection sits under its Employee and adds no valuation. It automatically cancels the next Poach or Hostile Acquisition against that Employee, then is discarded. It does not block Ditch.",
+        "A Non-Compete used for protection sits under its Employee and adds no valuation. It automatically cancels the next Poach against that Employee, then is discarded. It does not block Ditch.",
         "The attachment follows its Employee into a venture or to a new owner. If the Employee is discarded, discard its attachment too. If Non-Compete was banked for $10M, it is just a positive-value card and protects nothing."
       ]
     },

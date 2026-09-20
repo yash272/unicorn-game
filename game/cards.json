@@ -397,20 +397,20 @@
       }
     },
     {
-      "key": "hostile-acquisition",
-      "name": "Hostile Acquisition",
+      "key": "cease-and-desist",
+      "name": "Cease & Desist",
       "category": "Attack",
       "role": "tactic",
       "value": 10,
-      "copies": 1,
-      "icon": "Swords",
+      "copies": 2,
+      "icon": "Gavel",
       "color": "coral",
-      "effect": "Take 1 Employee or Growth card from a rival into your startup. You may take a shared Employee. Discard this card.",
-      "flavor": "This meeting could have been a threat.",
+      "effect": "Return 1 Growth card from a rival's startup to their hand. They immediately discard down to 7 if needed. Best Lawyers in Town can block this. Discard this.",
+      "flavor": "Our lawyers would like a word.",
       "id": "U27",
       "outcome": {
-        "headline": "TAKE 1 ASSET",
-        "caption": "EMPLOYEE OR GROWTH CARD"
+        "headline": "BACK TO HAND",
+        "caption": "REMOVE A RIVAL'S GROWTH CARD"
       }
     },
     {
@@ -439,12 +439,12 @@
       "copies": 2,
       "icon": "Scale",
       "color": "yellow",
-      "effect": "React: cancel Patent Lawsuit, Steal Customer or Hostile Acquisition. Or use 1 card play to remove 1 pending Lawsuit from you or your partner. Discard this.",
+      "effect": "React: cancel Patent Lawsuit, Steal Customer or Cease & Desist. Or use 1 card play to remove 1 pending Lawsuit from you or your partner. Discard this.",
       "flavor": "Our hourly rate is a power move.",
       "id": "U29",
       "outcome": {
         "headline": "BLOCK AN ATTACK",
-        "caption": "LAWSUIT / CUSTOMER THEFT / ACQUISITION"
+        "caption": "LAWSUIT / THEFT / CEASE & DESIST"
       }
     },
     {
@@ -456,12 +456,12 @@
       "copies": 2,
       "icon": "Wallet",
       "color": "yellow",
-      "effect": "React: cancel Poach or Hostile Acquisition targeting an Employee belonging to you or your partner. Cannot block Ditch. Discard this.",
+      "effect": "React: cancel Poach targeting an Employee belonging to you or your partner. Cannot block Ditch. Discard this.",
       "flavor": "Retention is a strong word.",
       "id": "U30",
       "outcome": {
         "headline": "KEEP YOUR EMPLOYEE",
-        "caption": "BLOCK POACH OR HOSTILE ACQUISITION"
+        "caption": "BLOCK POACH AGAINST AN EMPLOYEE"
       }
     },
     {
@@ -507,12 +507,12 @@
       "copies": 2,
       "icon": "FileLock2",
       "color": "yellow",
-      "effect": "Attach to 1 of your Employees. Automatically cancel the next Poach or Hostile Acquisition targeting it, then discard this. Does not stop Ditch.",
+      "effect": "Attach to 1 of your Employees. Automatically cancel the next Poach targeting it, then discard this. Does not stop Ditch.",
       "flavor": "Please read the extremely fine print.",
       "id": "U33",
       "outcome": {
         "headline": "PROTECT 1 EMPLOYEE",
-        "caption": "BLOCK THE NEXT POACH OR ACQUISITION"
+        "caption": "BLOCK THE NEXT POACH"
       }
     },
     {
@@ -555,7 +555,7 @@
       "category": "Attack",
       "role": "tactic",
       "value": 10,
-      "copies": 7,
+      "copies": 4,
       "icon": "Swords",
       "color": "coral",
       "effect": "Take both Employees from your Joint Venture and end it. Your valuation stays the same; your partner loses their shared value. If they block Ditch, they take both instead. Discard this.",
@@ -564,6 +564,23 @@
       "outcome": {
         "headline": "TAKE BOTH EMPLOYEES",
         "caption": "END THE VENTURE / PARTNER LOSES SHARED VALUE"
+      }
+    },
+    {
+      "key": "founder-mixer",
+      "name": "Founder Mixer",
+      "category": "Event",
+      "role": "tactic",
+      "value": 10,
+      "copies": 2,
+      "icon": "Users",
+      "color": "pink",
+      "effect": "Everyone with cards in hand chooses 1, then passes it face-down to the player on their left at the same time. Empty hands pass nothing. Discard this.",
+      "flavor": "Your next bad decision is a warm introduction.",
+      "id": "U41",
+      "outcome": {
+        "headline": "PASS 1 CARD LEFT",
+        "caption": "EVERYONE CHOOSES / PASS FACE-DOWN"
       }
     },
     {

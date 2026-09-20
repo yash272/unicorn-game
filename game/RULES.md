@@ -16,6 +16,10 @@ Put your chosen Startup face-up. Its $50M always counts and it can never be take
 
 Reach $1,000M or more at the end of your own completed turn, after every effect and reaction has resolved. Only one player wins. Your partner does not share the win. Players are never eliminated.
 
+## Founder Mixer: everyone passes
+
+Use one normal card play. After putting Founder Mixer down, everyone with a card in hand secretly chooses 1. Pass all chosen cards face-down to the player on the left simultaneously; choose before receiving. Empty hands pass nothing but can receive a card. Discard Mixer after the pass. It cannot pass itself. No defense blocks this event, and there is no separate event phase.
+
 ## 1 / Draw one
 
 Draw 1 card from the draw pile. Whenever any effect takes your hand above 7, immediately choose and discard down to 7 before continuing. This applies after every draw or exchange, even outside your turn.
@@ -62,6 +66,10 @@ The player using Founder Scandal privately sees every card in the target's hand.
 
 Partners may use an eligible defense for one another, but never have to. For Ditch, only the partner being ditched can play Golden Handcuffs. Nobody else can intervene. A banked defense never protects anything.
 
+## Cease & Desist: back to hand
+
+Choose 1 Growth card in a rival's startup and return it to their hand. They lose that card's valuation immediately and may replay it on their own turn. If their hand exceeds 7, they choose and discard down immediately. Best Lawyers in Town can cancel the attack before anything moves. Discard Cease & Desist after resolving.
+
 ## Form a Joint Venture
 
 Use Joint Venture as one of your two card plays. Choose an unpartnered rival who agrees; you must also be unpartnered. Each of you must have 1 unshared Employee already in your startup. You cannot use Employees from your hand.
@@ -76,7 +84,7 @@ You may attack a partner, but the venture ends only through Ditch or the removal
 
 ## If someone takes a shared Employee
 
-Resolve any eligible defense first. If Poach or Hostile Acquisition succeeds, the attacker takes the chosen Employee. Return the other committed Employee to its original contributor and discard Joint Venture. The partnership ends; recalculate both startups.
+Resolve any eligible defense first. If Poach succeeds, the attacker takes the chosen Employee. Return the other committed Employee to its original contributor and discard Joint Venture. The partnership ends; recalculate both startups.
 
 ## Ditch succeeds
 
@@ -106,7 +114,7 @@ Crisis PR Team can cancel an incoming PR Crisis or use one card play to discard 
 
 ## Attached defenses
 
-A Non-Compete used for protection sits under its Employee and adds no valuation. It automatically cancels the next Poach or Hostile Acquisition against that Employee, then is discarded. It does not block Ditch.
+A Non-Compete used for protection sits under its Employee and adds no valuation. It automatically cancels the next Poach against that Employee, then is discarded. It does not block Ditch.
 
 The attachment follows its Employee into a venture or to a new owner. If the Employee is discarded, discard its attachment too. If Non-Compete was banked for $10M, it is just a positive-value card and protects nothing.
 

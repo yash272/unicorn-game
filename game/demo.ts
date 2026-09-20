@@ -1,6 +1,6 @@
 import catalog from './cards.json' with { type: 'json' };
 
-export type Scenario = 'poach' | 'investor' | 'founder-scandal' | 'joint-venture' | 'ditch' | 'patent-lawsuit' | 'pr-crisis';
+export type Scenario = 'poach' | 'investor' | 'founder-scandal' | 'joint-venture' | 'ditch' | 'patent-lawsuit' | 'pr-crisis' | 'cease-and-desist' | 'founder-mixer';
 export type Stage = 'ready' | 'played' | 'blocked' | 'banked' | 'skipped';
 export type PlayerId = 'neural' | 'rocket' | 'flash' | 'fin';
 export type Instance = { id: string; key: string };
@@ -14,6 +14,8 @@ export const scenarios: { key: Scenario; label: string; action: string; defense?
   { key: 'joint-venture', label: 'Joint Venture', action: 'Agree to partner up', message: 'Neural AI commits its CTO; Flash Commerce commits its Scientist. Each partner will count both Employees.' },
   { key: 'ditch', label: 'Ditch', action: 'Ditch your partner', defense: 'golden-handcuffs', message: 'You both count the shared $225M. Ditch keeps both Employees for Neural AI—unless Flash Commerce reverses it.' },
   { key: 'patent-lawsuit', label: 'Patent Lawsuit', action: 'File the lawsuit', defense: 'best-lawyers', message: 'Flash Commerce will miss its next whole turn, including its draw. A lawyer can stop the lawsuit.' },
+  { key: 'cease-and-desist', label: 'Cease & Desist', action: 'Send their launch back', defense: 'best-lawyers', message: 'Return Flash Commerce’s Viral Launch to their hand. They lose its $125M until they play it again.' },
+  { key: 'founder-mixer', label: 'Founder Mixer', action: 'Everyone passes left', message: 'Everyone chooses one card from their hand, then passes it face-down to the player on their left at the same time.' },
   { key: 'pr-crisis', label: 'PR Crisis', action: 'Start a PR crisis', defense: 'crisis-pr-team', message: 'A visible -$75M penalty stays beside Flash Commerce until Crisis PR Team removes it.' },
 ];
 export function cardInfo(key: string) {
@@ -30,6 +32,26 @@ export function limitHand<T>(hand: T[], discardIndices: number[]): { hand: T[]; 
   if (discardIndices.length !== needed || new Set(discardIndices).size !== needed || discardIndices.some(i => !Number.isInteger(i) || i < 0 || i >= hand.length)) throw new Error(`Choose exactly ${needed} cards to discard`);
   return { hand: hand.filter((_, i) => !discardIndices.includes(i)), discarded: hand.filter((_, i) => discardIndices.includes(i)) };
 }
+/** Player order follows the seating circle; index + 1 is the player on the left. */
+export function passCardsLeft<T>(hands: T[][], choices: (number | null)[]): T[][] {
+  if (hands.length < 3 || hands.length > 5 || choices.length !== hands.length) throw new Error('Choose once for each of 3–5 players');
+  for (let i = 0; i < hands.length; i++) {
+    const choice = choices[i];
+    if (hands[i].length === 0 ? choice !== null : choice === null || !Number.isInteger(choice) || choice < 0 || choice >= hands[i].length) throw new Error('Choose one existing card, or pass nothing from an empty hand');
+  }
+  const result = hands.map((hand, i) => hand.filter((_, j) => j !== choices[i]));
+  // Read every selected card from the original hands, never from an incoming pass.
+  hands.forEach((hand, i) => { const choice = choices[i]; if (choice !== null) result[(i + 1) % hands.length].push(hand[choice]); });
+  return result;
+}
+export function returnGrowthToHand(player: Player, cardId: string, discardIndices: number[] = []): Instance[] {
+  const index = player.cards.findIndex(c => c.id === cardId);
+  if (index < 0 || cardInfo(player.cards[index].key).category !== 'Growth') throw new Error('Choose a Growth card in the target startup');
+  const limited = limitHand([...player.hand, player.cards[index]], discardIndices);
+  player.cards.splice(index, 1);
+  player.hand = limited.hand;
+  return limited.discarded;
+}
 export function freshTable(scenario: Scenario): TableState {
   const setup = scenarios.find(s => s.key === scenario)!;
   const instance = (key: string, id: string): Instance => ({ key, id });
@@ -39,6 +61,14 @@ export function freshTable(scenario: Scenario): TableState {
     { id: 'flash', name: 'Flash Commerce', sector: 'CONSUMER', color: 'lime', subtotal: 305, cards: [instance('chief-scientist', 'scientist')], hand: [instance('ditch', 'their-ditch'), instance(setup.defense || 'golden-handcuffs', 'their-defense'), instance('investor', 'their-investor'), instance('patent-lawsuit', 'their-lawsuit'), instance('viral-launch', 'their-launch')], penalties: [], skipNextTurn: false, skipped: false },
     { id: 'fin', name: 'FinPay', sector: 'FINTECH', color: 'cyan', subtotal: 300, cards: [], hand: [], penalties: [], skipNextTurn: false, skipped: false },
   ];
+  if (scenario === 'cease-and-desist') {
+    players[2].subtotal = 180;
+    players[2].cards.push(instance('viral-launch', 'growth-demo'));
+  }
+  if (scenario === 'founder-mixer') {
+    players[1].hand = [instance('elite-engineer','rocket-engineer'), instance('poach','rocket-poach'), instance('viral-product','rocket-product'), instance('best-lawyers','rocket-lawyers'), instance('investor','rocket-investor')];
+    players[3].hand = [instance('pr-crisis','fin-pr'), instance('growth-lead','fin-growth'), instance('government-contract','fin-contract'), instance('not-for-sale','fin-defense'), instance('ditch','fin-ditch')];
+  }
   const state: TableState = { players, venture: null, revealedTo: null, revealedPlayer: null, discarded: [] };
   if (scenario === 'joint-venture' || scenario === 'ditch') {
     players[0].subtotal = 575; players[2].subtotal = 675;
@@ -81,6 +111,12 @@ export function resolveDemo(scenario: Scenario, stage: Stage, randomIndex = 0): 
     case 'ditch': resolveDitch(state, false); state.discarded.push(action); break;
     case 'patent-lawsuit': target.skipNextTurn = stage !== 'skipped'; target.skipped = stage === 'skipped'; if (stage === 'skipped') state.discarded.push(action); break;
     case 'pr-crisis': target.penalties.push(-75); break;
+    case 'cease-and-desist': state.discarded.push(...returnGrowthToHand(target, 'growth-demo'), action); break;
+    case 'founder-mixer': {
+      const hands = passCardsLeft(state.players.map(p => p.hand), state.players.map(p => p.hand.length ? 0 : null));
+      state.players.forEach((p, i) => { p.hand = hands[i]; });
+      state.discarded.push(action); break;
+    }
   }
   return state;
 }

@@ -144,7 +144,7 @@ def printable():
     c.save();return path
 
 def individual():
-    path=OUT/'UNICORN-individual-cards.pdf';c=canvas.Canvas(str(path),pagesize=(180,252));c.setTitle('UNICORN | 40 card designs + universal back | Edition 02')
+    path=OUT/'UNICORN-individual-cards.pdf';c=canvas.Canvas(str(path),pagesize=(180,252));c.setTitle(f'UNICORN | {len(CARDS)} card designs + universal back | Edition 02')
     for card in CARDS:front(c,card);c.showPage()
     back(c);c.showPage();c.save();return path
 
@@ -153,7 +153,7 @@ def concept():
     rect(c,0,0,612,792,'paper');rect(c,0,664,612,128,'ink')
     text(c,'UNICORN',28,729,55,'Heavy','lime');text(c,'BUILD A STARTUP. BETRAY YOUR FRIENDS.',30,703,14,'Display','paper')
     text(c,'First to $1B valuation wins. Only one of you.',30,679,12,'Body','paper')
-    text(c,'3–5 PLAYERS   /   ~45 MIN TARGET   /   VALUATION ONLY',28,642,9,'Bold')
+    text(c,'3–5 PLAYERS   /   ~45 MIN TARGET   /   100-CARD MAIN DECK',28,642,9,'Bold')
     text(c,'THE WHOLE TURN',28,615,17,'Display')
     flow=[('01','DRAW 1','Keep at most 7 cards. Discard any excess immediately.'),('02','PLAY UP TO 2','Use an effect OR place a card face-up for its valuation.'),('03','COUNT & PASS','End your turn at $1,000M after reactions to win.')]
     for i,(num,title,body) in enumerate(flow):
@@ -168,11 +168,11 @@ def concept():
         ('chief-scientist','Place in your startup. You may share this Employee in a Joint Venture.'),
         ('poach','Move a rival’s positive-value card into your startup. Shared Employees count.'),
         ('investor','Give the target +$50M. Take 1 random card from their hidden hand.'),
-        ('founder-scandal','Privately look at all their cards. Return their hand unchanged.'),
+        ('founder-mixer','Everyone chooses 1 hand card, then passes it face-down left. Empty hands pass nothing.'),
         ('joint-venture','Both agree and commit 1 Employee each. Both count both Employees.'),
         ('ditch','Keep both shared Employees. Your value stays; your partner loses theirs.'),
         ('golden-handcuffs','Cancel Poach. Against Ditch, defender keeps both Employees; the venture ends.'),
-        ('patent-lawsuit','Target skips their next whole turn, including the draw. Then discard this.'),
+        ('cease-and-desist','Return a rival’s Growth card to their hand. Best Lawyers in Town can block this.'),
         ('pr-crisis','Penalty stays beside the rival until Crisis PR Team removes it.')]
     for i,(key,body) in enumerate(examples):
         d=next(d for d in CARDS if d['key']==key);x=28+(i%3)*190;y=268-(i//3)*114
