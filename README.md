@@ -1,37 +1,29 @@
-# unicorn-game
+# UNICORN
 
-UNICORN is a startup-themed card game: build a company, raise money, hire talent, sabotage competitors, and be first to a $1B valuation.
+A startup card game for 3–5 players. Build a company, share Employees, betray a partner, and reach $1B valuation. About 45 minutes is a playtest target, not a measured duration.
 
-This repository contains its responsive website, collectible card gallery, and interactive attack/defense demo.
+## Edition 02
 
-## Run locally
+The current game tracks valuation only. There is no Cash, upkeep, shared market or separate round-event phase. Each player chooses a $50M Startup and receives 5 random cards. On each turn, draw 1 and play up to 2 cards. Immediately discard down to 7 whenever a draw or exchange exceeds the limit.
 
-Requires Node.js 22.13 or later.
+Play a card's effect or bank it face-up for its printed valuation. Banked cards cannot activate later. Attacks and defenses bank for $10M. Reactions come from the hand and do not use the two normal card plays. Only one player wins, at the end of their own completed turn.
 
-```sh
-npm run install:ci
-npm run dev
-```
+Investor gives the opponent a face-up +$50M card in exchange for one random card from their hand. Joint Venture shares one Employee from each startup; both partners count both. Ditch gives both shared Employees to the attacker, preserving their valuation while reducing the partner's. Golden Handcuffs reverses Ditch: the defender keeps both instead.
 
-Open the local URL printed by the development server.
+## Sources and outputs
 
-## Build
+- `game/cards.json` defines 40 designs and copy counts: 100 main-deck cards, 15 Startup cards, 5 References.
+- `game/rules.json` provides the complete website and PDF rules; `game/RULES.md` is a readable companion.
+- `game/demo.ts` drives seven scripted, mid-game interactive examples. This is not an online multiplayer game.
+- `scripts/export-pdfs.py` uses ReportLab to generate the one-page concept sheet, full 120-card print set with rules, and 40 individual card fronts plus a universal back. Fonts are bundled in `public/fonts/`.
+- Generated PDFs are copied to `public/downloads/` for the website and `../output/pdf/` for sharing.
 
-```sh
-npm run build
-npm run start
-```
+Run `python3 scripts/export-pdfs.py` with ReportLab installed after editing the card catalog or rules. Print the full deck's pages 7–46 at Actual Size, landscape, short-edge duplex. Test the first front/back pair before printing everything.
 
-The site uses React, Vinext, and a Cloudflare Worker. The playtest CTA is intentionally inactive while the Kickstarter campaign link is being prepared.
+## Local development
 
-## Hosting
+Use Node 22.13 or newer. Run `npm ci`, then `npm run dev`; the preview runs at http://localhost:5173. The Kickstarter playtest button is deliberately disabled until a campaign link is provided. The site collects no signup data and has no database-backed form.
 
-The private hosted website is available at:
+Checks: `node --experimental-strip-types --test tests/gameplay.test.mjs`, `npx tsc --noEmit`, and `npm run lint`.
 
-https://unicorn-card-game.walkingthetalk1234.chatgpt.site
-
-This repository holds the complete source. The existing Sites project is recorded in `.openai/hosting.json`.
-
-## Prototype status
-
-The website follows the supplied rules. Card effects that have not been defined are marked as in development, and all demo quotes are clearly labeled as placeholders. The demo illustrates an interaction rather than implementing a complete multiplayer game.
+Sites hosting is configured by `.openai/hosting.json`. Build and publish using the installed Sites tooling while preserving the existing audience. GitHub origin remains `https://github.com/yash272/unicorn-game.git`.

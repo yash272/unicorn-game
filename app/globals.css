@@ -244,3 +244,84 @@
 .signup-placeholder .eyebrow { font-size: 10px; }
 .signup-placeholder > p { font-size: 14px; color: var(--muted); line-height: 1.7; margin: 0 0 26px; max-width: 360px; }
 .signup-placeholder .submit-button { opacity: .72; }
+
+/* Valuation-only edition: the same packaging, with clearer card choices. */
+.hero-card .skip-stat { font-size: 27px; }
+.valuation-only .number-rule > span { font-size: 13px; letter-spacing: .5px; }
+.valuation-only .number-rule p, .accounting-intro p { font-size: 15px; }
+.tactic-rule > span, .tactic-rule > strong { color: var(--lime); }
+.step p, .exposure-rule p, .section-heading .section-copy { font-size: 16px; }
+.downloads { display: flex; flex-wrap: wrap; gap: 20px 35px; margin-top: 27px; }
+.downloads .text-button { font-size: 15px; }
+.card-use-label { font-size: 12px; font-weight: 800; letter-spacing: .6px; margin-bottom: 8px; }
+.card-effect { font-size: 15px; line-height: 1.55; min-height: 0; }
+.card-flavor { font-size: 14px; line-height: 1.5; }
+.sample-top { font-size: 12px; letter-spacing: .6px; }
+.sample-value > span { font-size: 12px; line-height: 1.5; letter-spacing: .3px; }
+.card-visibility { font-size: 12px; }
+.card-legend > span { font-size: 14px; }
+.sample-card h3 { line-height: 1.06; min-height: 68px; }
+.scenario-tabs { display: flex; flex-wrap: wrap; gap: 9px; margin: 0 0 22px; }
+.scenario-tabs button { border: 1px solid #51445f; border-radius: 7px; background: #1d1627; color: #e4dced; padding: 11px 15px; font-size: 14px; line-height: 1.4; }
+.scenario-tabs button[aria-pressed=true] { background: var(--violet); border-color: var(--violet); color: #191222; font-weight: 700; }
+.company-asset { flex-direction: column; align-items: stretch; gap: 7px; }
+.scientist-asset, .scientist-asset b, .asset-placeholder { font-size: 12px; }
+.scientist-asset b { margin-left: 0; }
+.penalty-asset { background: #3e1e23; border: 1px solid #8e4e50; border-radius: 5px; color: #ffbcb2; padding: 8px; font-size: 12px; line-height: 1.5; }
+.venture-zone, .demo-hand { display: grid; grid-template-columns: .8fr 1.2fr; align-items: center; gap: 22px; padding: 23px; margin: 24px 0; background: #21192e; border: 1px solid #715d87; border-radius: 9px; }
+.venture-zone .eyebrow, .demo-hand .eyebrow { font-size: 12px; letter-spacing: .7px; }
+.venture-zone h3 { font-size: 20px; margin: 12px 0 8px; }
+.venture-zone p, .demo-hand p { font-size: 14px; color: #c4b7d5; margin: 0; }
+.shared-employees { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.shared-employees > div { display: flex; flex-direction: column; gap: 9px; background: var(--cyan); color: #171421; padding: 16px; border-radius: 7px; box-shadow: 0 4px 0 #071018; }
+.shared-employees span { font-size: 12px; font-weight: 700; line-height: 1.4; }
+.shared-employees strong { font-family: 'Barlow Condensed', Impact, sans-serif; font-size: 27px; line-height: 1.1; text-transform: uppercase; }
+.shared-employees b { font-size: 21px; }
+.game-table .demo-action { margin-top: 24px; }
+.demo-narration p { font-size: 16px; }
+.demo-narration .eyebrow { font-size: 12px; line-height: 1.5; }
+.demo-controls { max-width: 280px; min-width: 230px; }
+.demo-controls .button { font-size: 14px; white-space: normal; }
+.bank-button { background: #332740; border: 1px solid #6d587f; border-radius: 6px; color: #eddefd; padding: 10px 13px; font-size: 14px; width: 100%; }
+.reset-button { font-size: 14px; padding: 9px; }
+.hand-cards { display: flex; gap: 7px; align-items: stretch; }
+.hand-cards > div { flex: 1; min-width: 0; min-height: 123px; border: 1px solid #8a6ba7; border-radius: 6px; padding: 12px 8px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 9px; }
+.hand-back { background: #100c19; color: var(--violet); }
+.hand-face { background: #c7a5ed; color: #1d1525; }
+.hand-cards span { font-size: 12px; }
+.hand-cards strong { font-size: 14px; line-height: 1.3; overflow-wrap: anywhere; }
+.table-footnote { font-size: 14px; line-height: 1.7; }
+.table-topline { font-size: 12px; letter-spacing: .3px; flex-wrap: wrap; }
+.company-heading > span { font-size: 12px; letter-spacing: .3px; }
+.full-rules-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 42px; padding: 18px 0 30px; }
+.full-rules-grid h4 { font-size: 18px; margin: 0 0 11px; color: var(--ink); }
+.full-rules-grid p { color: var(--muted); font-size: 16px; line-height: 1.7; }
+.rule-content p, .rule-content h4 { font-size: 16px; }
+.startup-value { display: block; font-family: 'Barlow Condensed', Impact, sans-serif; font-size: 30px; color: var(--card-color); margin-top: 18px; }
+.prototype-timing { color: var(--muted); font-size: 14px!important; max-width: 410px; }
+@media(max-width: 1100px) {
+ .demo-action { flex-wrap: wrap; }
+ .demo-controls { flex: 1; max-width: none; min-width: 210px; }
+ .venture-zone, .demo-hand { grid-template-columns: 1fr; }
+}
+@media(max-width: 800px) {
+ .full-rules-grid { grid-template-columns: 1fr; }
+ .scenario-tabs { gap: 8px; }
+ .scenario-tabs button { font-size: 14px; padding: 10px 12px; }
+ .demo-action { padding: 18px; }
+ .demo-controls { width: 100%; flex-basis: 100%; min-width: 0; }
+ .table-topline { font-size: 12px; }
+}
+@media(max-width: 480px) {
+ .hero-card .skip-stat { font-size: 23px; }
+ .venture-zone, .demo-hand { padding: 16px; }
+ .shared-employees { gap: 9px; }
+ .shared-employees > div { padding: 11px; }
+ .shared-employees strong { font-size: 23px; }
+ .shared-employees span { font-size: 12px; }
+ .hand-cards { flex-wrap: wrap; }
+ .hand-cards > div { flex: 1 1 28%; min-height: 99px; }
+ .sample-card { transform: none; }
+ .demo-narration { flex-basis: calc(100% - 80px); }
+ .demo-controls .button { font-size: 14px; }
+}
