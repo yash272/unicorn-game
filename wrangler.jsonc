@@ -1,0 +1,15 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "unicorn-game",
+  "main": "vinext/server/fetch-handler",
+  "compatibility_date": "2026-05-15",
+  "compatibility_flags": ["nodejs_compat"],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "unicorn-game",
+      "database_id": "2c66c0a3-c0ca-49dc-8cb4-07a5c36b4f61",
+      "migrations_dir": "drizzle",
+    },
+  ],
+}
