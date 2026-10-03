@@ -20,7 +20,7 @@ import rules from "../../game/rules.json";
 import type { Card, Command, Move, view } from "../../game/online";
 import "./play.css";
 type Table = ReturnType<typeof view> & { code: string };
-type ApiError = { error?: string; needsJoin?: boolean };
+type ApiError = { error?: string; needsJoin?: boolean; needsNewRoom?: boolean };
 function isTable(data: unknown): data is Table {
   return (
     typeof data === "object" &&
@@ -133,7 +133,11 @@ export default function OnlineTrial() {
   const receive = useCallback(
     (response: Response, data: unknown) => {
       if (response.ok && isTable(data)) accept(data);
-      else if (apiError(data).needsJoin) {
+      else if (apiError(data).needsNewRoom) {
+        setTable(null); current.current = null; setRoom(""); setNeedsJoin(false); setJoinCode(""); setInspect(null); setShowRules(false);
+        setError(apiError(data).error || "Create a new room for the updated rules."); setConnected(false);
+        window.history.replaceState(null, "", "/play");
+      } else if (apiError(data).needsJoin) {
         setNeedsJoin(true);
         setTable(null);
         current.current = null;
@@ -253,7 +257,7 @@ export default function OnlineTrial() {
         m.command.cardId === inspect.id,
     ) || [];
   const shownMoves = (table?.moves || []).filter(
-    (m) => !["bank", "effect"].includes(m.command.type),
+    (m) => !["bank", "effect", "steal"].includes(m.command.type),
   );
   let status = "";
   if (table) {
@@ -273,10 +277,8 @@ export default function OnlineTrial() {
       status =
         pending.kind === "venture"
           ? `${person(pending.actor)} invited ${person(pending.target)} to partner.`
-          : pending.kind === "mixer"
-            ? "Founder Mixer: choose secretly, then everyone passes left."
-            : pending.kind === "reveal"
-              ? `${person(pending.actor)} is privately viewing ${person(pending.target)}’s hand.`
+          : pending.kind === "reveal"
+              ? `${person(pending.actor)} is privately choosing a card from ${person(pending.target)}’s hand.`
               : pending.kind === "offer"
                 ? `${person(pending.actor)} may counter Golden Handcuffs.`
                 : `${person(pending.actor)} played ${(pending.card as Card)?.key ? def((pending.card as Card).key).name : "an attack"} against ${person(pending.target)}.`;
@@ -331,7 +333,7 @@ export default function OnlineTrial() {
             </p>
             <div className="online-pills">
               <span>3–5 players</span>
-              <span>100-card deck</span>
+              <span>98-card deck</span>
               <span>~45 minutes</span>
             </div>
             <div className="welcome-deck">
@@ -625,7 +627,7 @@ export default function OnlineTrial() {
                 </section>
               ))}
               {shownMoves.some((m) =>
-                ["react", "accept", "mix", "discard"].includes(m.command.type),
+                ["react", "accept", "discard"].includes(m.command.type),
               ) && (
                 <section className="response-panel">
                   <h3>
@@ -633,14 +635,12 @@ export default function OnlineTrial() {
                       ? "Discard down to seven"
                       : pending?.kind === "venture"
                         ? "Choose the Employee you’ll share"
-                        : pending?.kind === "mixer"
-                          ? "Choose one card to pass left"
-                          : "Your reaction"}
+                        : "Your reaction"}
                   </h3>
                   <div>
                     {shownMoves
                       .filter((m) =>
-                        ["react", "accept", "mix", "discard"].includes(
+                        ["react", "accept", "discard"].includes(
                           m.command.type,
                         ),
                       )
@@ -796,22 +796,15 @@ export default function OnlineTrial() {
               FOUNDER SCANDAL · ONLY YOU SEE THIS
             </span>
             <h2>{person(pending?.target)}’s hand</h2>
+            <p>Privately see their complete hand. Choose one card to steal into your hand.</p>
             <div>
               {table.reveal.map((c) => (
-                <img
-                  key={c.id}
-                  src={`/cards/${c.key}.png`}
-                  alt={`${def(c.key).name}: ${def(c.key).effect}`}
-                />
+                <div className="reveal-choice" key={c.id}>
+                  <img src={`/cards/${c.key}.png`} alt={`${def(c.key).name}: ${def(c.key).effect}`} />
+                  <button className="online-primary" disabled={busy || !table.moves.some(m => m.command.type === "steal" && m.command.cardId === c.id)} onClick={() => move({ type: "steal", cardId: c.id })}>Steal {def(c.key).name}</button>
+                </div>
               ))}
             </div>
-            <button
-              className="online-primary"
-              disabled={busy}
-              onClick={() => move({ type: "ack" })}
-            >
-              Done viewing
-            </button>
           </section>
         </div>
       )}
@@ -835,7 +828,7 @@ export default function OnlineTrial() {
             <span className="online-eyebrow">THE SAME PRINTED GAME</span>
             <h2>One billion. One winner.</h2>
             <p>
-              100 draw cards · 15 startup cards · 5 reference cards. The online
+              98 draw cards · 15 startup cards · 5 reference cards. The online
               table pauses for eligible players to defend or pass.
             </p>
             <a

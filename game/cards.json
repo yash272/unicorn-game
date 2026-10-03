@@ -1,5 +1,5 @@
 {
-  "edition": "02",
+  "edition": "03",
   "title": "Valuation-only edition",
   "players": [
     3,
@@ -369,12 +369,12 @@
       "copies": 2,
       "icon": "Megaphone",
       "color": "coral",
-      "effect": "Privately look at every card in 1 rival's hand. Return the hand unchanged. Only you see it. Discard this card.",
+      "effect": "Privately look at every card in 1 rival's hand. Choose 1 to steal into your hand. Only you see the hand. Discard this card.",
       "flavor": "Your pitch deck leaked. So did the group chat.",
       "id": "U25",
       "outcome": {
-        "headline": "SEE THEIR HAND",
-        "caption": "PRIVATELY REVEAL ALL THEIR CARDS"
+        "headline": "CHOOSE & STEAL 1",
+        "caption": "PRIVATELY SEE THEIR WHOLE HAND"
       }
     },
     {
@@ -564,23 +564,6 @@
       "outcome": {
         "headline": "TAKE BOTH EMPLOYEES",
         "caption": "END THE VENTURE / PARTNER LOSES SHARED VALUE"
-      }
-    },
-    {
-      "key": "founder-mixer",
-      "name": "Founder Mixer",
-      "category": "Event",
-      "role": "tactic",
-      "value": 10,
-      "copies": 2,
-      "icon": "Users",
-      "color": "pink",
-      "effect": "Everyone with cards in hand chooses 1, then passes it face-down to the player on their left at the same time. Empty hands pass nothing. Discard this.",
-      "flavor": "Your next bad decision is a warm introduction.",
-      "id": "U41",
-      "outcome": {
-        "headline": "PASS 1 CARD LEFT",
-        "caption": "EVERYONE CHOOSES / PASS FACE-DOWN"
       }
     },
     {

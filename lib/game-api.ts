@@ -8,6 +8,7 @@ import {
   type Command,
 } from "../game/online";
 import { z } from "zod";
+import catalog from "../game/cards.json";
 const createSchema = z
   .object({ name: z.string().trim().min(1).max(24) })
   .strict();
@@ -128,6 +129,8 @@ async function room(request: Request, code: string) {
   if (Date.now() - record.updated_at > 14 * 86400000)
     return json({ error: "This room has expired. Create a new room." }, 410);
   const s: Room = JSON.parse(record.state);
+  if (s.rulesEdition !== catalog.edition)
+    return json({ error: "This room uses the previous card rules. Create a new room to play the updated deck.", needsNewRoom: true }, 410);
   const token = credential(request, code);
   const tokenHash = token ? await hash(token) : "";
   let p = s.players.find((p) => p.tokenHash === tokenHash);

@@ -1050,3 +1050,7 @@
     transition: none !important;
   }
 }
+
+.reveal-choice { flex: 0 0 180px; display: flex; flex-direction: column; gap: 10px; }
+.reveal-choice img { width: 100%; height: auto; }
+.reveal-choice .online-primary { white-space: normal; font-size: 13px; min-height: 50px; padding: 10px; }

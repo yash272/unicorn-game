@@ -336,3 +336,6 @@
 .tactic-footer > span:first-child { opacity: .7; font-size: 12px; }
 .tactic-footer b { white-space: nowrap; }
 @media(max-width: 480px) { .sample-card .effect-art { min-height: 180px; } .effect-art > strong { font-size: 40px; } }
+
+.steal-hand-card { border: 1px solid #1d1525; color: #1d1525; background: #ddfa83; padding: 7px 9px; border-radius: 5px; font: inherit; font-size: 12px; cursor: pointer; }
+.steal-hand-card:hover { background: #f5f0e6; }

@@ -1,5 +1,5 @@
 """Generate all three UNICORN PDFs from game/cards.json and game/rules.json."""
-import json, shutil
+import json, shutil, math
 from pathlib import Path
 from xml.sax.saxutils import escape
 from reportlab.pdfgen import canvas
@@ -103,16 +103,16 @@ def crop(c,x,y):
 def page_header(c,kicker,heading,page):
     rect(c,0,0,792,612,'paper');text(c,'UNICORN / '+kicker,36,578,9,'Bold');text(c,heading,36,533,37,'Display')
     c.setStrokeColor(C['ink']);c.line(36,516,756,516)
-    text(c,'EDITION 02 • VALUATION ONLY • EARLY PLAYTEST',36,20,7,'Bold','muted');text(c,f'{page:02}',741,20,8,'Bold')
+    text(c,'EDITION 03 • VALUATION ONLY • EARLY PLAYTEST',36,20,7,'Bold','muted');text(c,f'{page:02}',741,20,8,'Bold')
 
 def printable():
-    path=OUT/'UNICORN-printable-deck.pdf';c=canvas.Canvas(str(path),pagesize=(792,612));c.setTitle('UNICORN | Complete printable deck and rules | Edition 02')
+    path=OUT/'UNICORN-printable-deck.pdf';c=canvas.Canvas(str(path),pagesize=(792,612));c.setTitle('UNICORN | Complete printable deck and rules | Edition 03')
     page_header(c,'PRINT & PLAY','ONE BILLION. ONE WINNER.',1)
-    text(c,'120',36,397,100,'Heavy');text(c,'PHYSICAL CARDS',42,370,12,'Bold')
+    text(c,'118',36,397,100,'Heavy');text(c,'PHYSICAL CARDS',42,370,12,'Bold')
     text(c,'3–5',300,411,58,'Heavy');text(c,'PLAYERS',303,385,11,'Bold')
     text(c,'~45',537,411,58,'Heavy');text(c,'MINUTES: PLAYTEST TARGET',540,385,10,'Bold')
     y=329
-    for title,body in [('What is inside','100 main-deck cards, 15 Startup cards and 5 Reference cards. Every playable card has a defined value and effect. All five startups begin at $50M.'),('How to print','Pages 7–46 contain 20 paired front/back sheets, with six poker-size cards per sheet (2.5 × 3.5 inches). Print landscape at 100% / Actual Size. Use duplex with short-edge flipping. Test pages 7–8 before printing the full set.'),('How to assemble','Cut on the corner marks. Use opaque sleeves with a spare playing card behind each print for a consistent feel. Or print only the odd-numbered card pages and use opaque sleeves.'),('Start playing','Read pages 3–6. Shuffle only the 100-card main deck, deal 5 hidden cards each, then choose a Startup. No special attack or defense is guaranteed.')]:
+    for title,body in [('What is inside','98 main-deck cards, 15 Startup cards and 5 Reference cards. Every playable card has a defined value and effect. All five startups begin at $50M.'),('How to print','Pages 7–46 contain 20 paired front/back sheets, with six poker-size cards per sheet (2.5 × 3.5 inches). Print landscape at 100% / Actual Size. Use duplex with short-edge flipping. The final sheet has four cards. Test pages 7–8 before printing the full set.'),('How to assemble','Cut on the corner marks. Use opaque sleeves with a spare playing card behind each print for a consistent feel. Or print only the odd-numbered card pages and use opaque sleeves.'),('Start playing','Read pages 3–6. Shuffle only the 98-card main deck, deal 5 hidden cards each, then choose a Startup. No special attack or defense is guaranteed.')]:
         text(c,title.upper(),36,y,11,'Bold');y=para(c,body,36,y-9,714,11)-25
     c.showPage();page_header(c,'DECK INDEX','EVERY CARD. EVERY COPY.',2)
     for col,group in enumerate([CARDS[:20],CARDS[20:]]):
@@ -134,26 +134,26 @@ def printable():
             assert y>35,(p,col,y)
         c.showPage()
     deck=[d for d in CARDS for _ in range(d['copies'])]
-    for sheet in range(20):
+    for sheet in range(math.ceil(len(deck)/6)):
         for i,d in enumerate(deck[sheet*6:sheet*6+6]):
             x=108+(i%3)*198;y=315-(i//3)*270;front(c,d,x,y);crop(c,x,y)
-        text(c,f'UNICORN • ED.02 • SHEET {sheet+1:02}/20 • FRONTS • PRINT AT 100%',108,20,7,'Bold','muted');c.showPage()
-        for i in range(6):
-            x=108+(i%3)*198;y=315-(i//3)*270;back(c,x,y);crop(c,x,y)
-        text(c,f'UNICORN • ED.02 • SHEET {sheet+1:02}/20 • BACKS • SHORT-EDGE DUPLEX',108,20,7,'Bold','muted');c.showPage()
+        text(c,f'UNICORN • ED.03 • SHEET {sheet+1:02}/20 • FRONTS • PRINT AT 100%',108,20,7,'Bold','muted');c.showPage()
+        for i in range(len(deck[sheet*6:sheet*6+6])):
+            x=108+(2-i%3)*198;y=315-(i//3)*270;back(c,x,y);crop(c,x,y)
+        text(c,f'UNICORN • ED.03 • SHEET {sheet+1:02}/20 • BACKS • SHORT-EDGE DUPLEX',108,20,7,'Bold','muted');c.showPage()
     c.save();return path
 
 def individual():
-    path=OUT/'UNICORN-individual-cards.pdf';c=canvas.Canvas(str(path),pagesize=(180,252));c.setTitle(f'UNICORN | {len(CARDS)} card designs + universal back | Edition 02')
+    path=OUT/'UNICORN-individual-cards.pdf';c=canvas.Canvas(str(path),pagesize=(180,252));c.setTitle(f'UNICORN | {len(CARDS)} card designs + universal back | Edition 03')
     for card in CARDS:front(c,card);c.showPage()
     back(c);c.showPage();c.save();return path
 
 def concept():
-    path=OUT/'UNICORN-founder-concept-one-page.pdf';c=canvas.Canvas(str(path),pagesize=(612,792));c.setTitle('UNICORN | The concept in one page | Edition 02')
+    path=OUT/'UNICORN-founder-concept-one-page.pdf';c=canvas.Canvas(str(path),pagesize=(612,792));c.setTitle('UNICORN | The concept in one page | Edition 03')
     rect(c,0,0,612,792,'paper');rect(c,0,664,612,128,'ink')
     text(c,'UNICORN',28,729,55,'Heavy','lime');text(c,'BUILD A STARTUP. BETRAY YOUR FRIENDS.',30,703,14,'Display','paper')
     text(c,'First to $1B valuation wins. Only one of you.',30,679,12,'Body','paper')
-    text(c,'3–5 PLAYERS   /   ~45 MIN TARGET   /   100-CARD MAIN DECK',28,642,9,'Bold')
+    text(c,'3–5 PLAYERS   /   ~45 MIN TARGET   /   98-CARD MAIN DECK',28,642,9,'Bold')
     text(c,'THE WHOLE TURN',28,615,17,'Display')
     flow=[('01','DRAW 1','Keep at most 7 cards. Discard any excess immediately.'),('02','PLAY UP TO 2','Use an effect OR place a card face-up for its valuation.'),('03','COUNT & PASS','End your turn at $1,000M after reactions to win.')]
     for i,(num,title,body) in enumerate(flow):
@@ -168,7 +168,7 @@ def concept():
         ('chief-scientist','Place in your startup. You may share this Employee in a Joint Venture.'),
         ('poach','Move a rival’s positive-value card into your startup. Shared Employees count.'),
         ('investor','Give the target +$50M. Take 1 random card from their hidden hand.'),
-        ('founder-mixer','Everyone chooses 1 hand card, then passes it face-down left. Empty hands pass nothing.'),
+        ('founder-scandal','Privately see a rival’s complete hand. Choose 1 card to steal into your hand.'),
         ('joint-venture','Both agree and commit 1 Employee each. Both count both Employees.'),
         ('ditch','Keep both shared Employees. Your value stays; your partner loses theirs.'),
         ('golden-handcuffs','Cancel Poach. Against Ditch, defender keeps both Employees; the venture ends.'),

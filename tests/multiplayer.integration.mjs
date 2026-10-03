@@ -153,3 +153,57 @@ test("malformed and cross-site requests are rejected as client errors", async ()
     403,
   );
 });
+
+test("Scandal reveals privately through the API and transfers only the chosen card", async () => {
+  const clients = Array.from({length: 3}, client);
+  const created = await clients[0].request('/api/game', {name: 'Scandal host'});
+  assert.equal(created.status,201);
+  const path='/api/game/'+created.data.code;
+  for(let i=1;i<3;i++) assert.equal((await clients[i].request(path,{type:'join',name:'Scandal player '+i})).status,200);
+  const move = async (i,command) => {
+    const before=(await clients[i].request(path)).data;
+    const response=await clients[i].request(path,{revision:before.revision,command});
+    assert.equal(response.status,200,JSON.stringify(response.data));
+    return response.data;
+  };
+  await move(0,{type:'start'});
+  const seats=new Map();
+  for(let i=0;i<3;i++) {
+    const v=(await clients[i].request(path)).data;seats.set(v.you,i);
+    assert.equal(v.deckCount+v.players.reduce((n,p)=>n+p.handCount,0),98);
+    await move(i,{type:'choose',key:v.choices[0]});
+  }
+  let actor;
+  for(let turns=0;turns<140;turns++) {
+    const table=(await clients[0].request(path)).data;
+    const i=seats.get(table.turn);
+    let v=await move(i,{type:'draw'});
+    while(v.hand.length>7) v=await move(i,v.moves.find(m=>m.command.type==='discard' && !m.command.cardId.startsWith('founder-scandal:'))?.command || v.moves.find(m=>m.command.type==='discard').command);
+    if(v.hand.some(c=>c.key==='founder-scandal')) {actor=i;break;}
+    await move(i,{type:'end'});
+  }
+  assert.notEqual(actor,undefined,'The two Scandal cards must be reachable from the 98-card draw pile');
+  const actorView=(await clients[actor].request(path)).data;
+  const effect=actorView.moves.find(m=>m.command.type==='effect' && actorView.hand.find(c=>c.id===m.command.cardId)?.key==='founder-scandal');
+  assert.ok(effect);
+  const target=seats.get(effect.command.targetId);
+  const observer=[0,1,2].find(i=>i!==actor && i!==target);
+  const original=(await clients[target].request(path)).data.hand;
+  await move(actor,effect.command);
+  await move(target,{type:'pass'});
+  const reveal=(await clients[actor].request(path)).data;
+  assert.deepEqual(reveal.reveal,original);
+  for(const i of [target,observer]) {
+    const hidden=(await clients[i].request(path)).data;
+    assert.equal(hidden.reveal,undefined);assert.equal(hidden.pending.cards,undefined);
+    assert.ok(!hidden.moves.some(m=>m.command.type==='steal'));
+  }
+  const chosen=original.at(-1);
+  const forged=await clients[observer].request(path,{revision:reveal.revision,command:{type:'steal',cardId:chosen.id}});
+  assert.equal(forged.status,400);
+  const stolen=await move(actor,{type:'steal',cardId:chosen.id});
+  assert.ok(stolen.hand.some(c=>c.id===chosen.id));
+  assert.equal(stolen.reveal,undefined);assert.equal(stolen.pending,null);
+  assert.deepEqual((await clients[target].request(path)).data.hand,original.slice(0,-1));
+  assert.equal(stolen.players[actor].valuation,50);
+});

@@ -1,10 +1,8 @@
-# UNICORN: valuation-only edition
-
-3-5 players. Target about 45 minutes. First to $1,000M at the end of their turn wins.
+# UNICORN - Valuation-only rules
 
 ## Set up in five minutes
 
-Separate the 15 Startup cards and 5 Reference cards from the 100-card draw pile. Shuffle the draw pile and deal 5 hidden cards to every player. No particular attack or defense is guaranteed.
+Separate the 15 Startup cards and 5 Reference cards from the 98-card draw pile. Shuffle the draw pile and deal 5 hidden cards to every player. No particular attack or defense is guaranteed.
 
 Deal each player 3 different Startup types from the Startup supply. They choose 1 and return the other 2; reshuffle before the next player chooses. Replace duplicate types within a deal. Different players may choose the same type.
 
@@ -15,10 +13,6 @@ Put your chosen Startup face-up. Its $50M always counts and it can never be take
 ## The finish line
 
 Reach $1,000M or more at the end of your own completed turn, after every effect and reaction has resolved. Only one player wins. Your partner does not share the win. Players are never eliminated.
-
-## Founder Mixer: everyone passes
-
-Use one normal card play. After putting Founder Mixer down, everyone with a card in hand secretly chooses 1. Pass all chosen cards face-down to the player on the left simultaneously; choose before receiving. Empty hands pass nothing but can receive a card. Discard Mixer after the pass. It cannot pass itself. No defense blocks this event, and there is no separate event phase.
 
 ## 1 / Draw one
 
@@ -58,9 +52,9 @@ The target must have at least 1 card in hand. Give them the Investor face-up: it
 
 Not For Sale cancels the entire exchange: no valuation is added and no hand card transfers. Discard the Investor and defense. If you bank Investor in your own startup instead, it adds $50M and no exchange happens.
 
-## Founder Scandal: private information
+## Founder Scandal: look, choose, steal
 
-The player using Founder Scandal privately sees every card in the target's hand. Return all cards unchanged and discard Scandal. No other player is entitled to see the hand. Crisis PR Team can cancel the reveal before it happens.
+Target a rival with at least 1 card in hand. Privately look at their complete hand, choose 1 card and take it into your own hand. Return the remaining cards to them without showing anyone else, then discard Scandal. The stolen card adds no valuation until banked. Crisis PR Team can cancel the entire attack before the hand is revealed.
 
 ## Defending for a partner
 
@@ -132,6 +126,6 @@ No free card gifts, swaps or binding verbal deals. Investor, Joint Venture and p
 
 ## Built for a first playtest
 
-The draw pile contains 100 cards: 56 worth $50M-$150M and 44 tactics worth $10M when banked. Five-card opening hands, one draw and up to two card plays aim for a game of about 45 minutes.
+The draw pile contains 98 cards: 56 worth $50M-$150M and 42 tactics worth $10M when banked. Five-card opening hands, one draw and up to two card plays aim for a game of about 45 minutes.
 
 That is a design target, not a measured result. This valuation-only edition changes the pace and needs live testing with 3, 4 and 5 players. Use the same printed rules for the first session before adjusting the card quantities.

@@ -39,14 +39,9 @@ type Pending =
       cardId: string;
       assetId: string;
     }
-  | {
-      kind: "mixer";
-      actor: string;
-      card: Card;
-      choices: Record<string, string>;
-    }
-  | { kind: "reveal"; actor: string; target: string; cards: Card[] };
+  | { kind: "reveal"; actor: string; target: string; card: Card; cards: Card[] };
 export type Room = {
+  rulesEdition: string;
   phase: "lobby" | "setup" | "playing" | "finished";
   host: string;
   players: Player[];
@@ -95,6 +90,7 @@ const shuffle = <T>(a: T[]) => {
 };
 export function createRoom(id: string, name: string, tokenHash: string): Room {
   return {
+    rulesEdition: catalog.edition,
     phase: "lobby",
     host: id,
     players: [
@@ -293,11 +289,9 @@ export function legalMoves(s: Room, id: string): Move[] {
         if (info(c).category === "Employee")
           add(`Agree and share ${info(c).name}`, "accept", { assetId: c.id });
     }
-    if (pending.kind === "mixer" && !pending.choices[id] && p.hand.length)
-      for (const c of p.hand)
-        add(`Pass ${info(c).name} left`, "mix", { cardId: c.id });
     if (pending.kind === "reveal" && pending.actor === id)
-      add("Done viewing their hand", "ack");
+      for (const c of player(s, pending.target).hand)
+        add(`Steal ${info(c).name}`, "steal", { cardId: c.id });
     return moves;
   }
   if (s.players[s.turn].id !== id) return moves;
@@ -323,9 +317,6 @@ export function legalMoves(s: Room, id: string): Move[] {
     switch (c.key) {
       case "investor-backchannel":
         effect("Draw two cards");
-        break;
-      case "founder-mixer":
-        effect("Everyone passes one card left");
         break;
       case "joint-venture":
         if (!ally)
@@ -384,7 +375,7 @@ export function legalMoves(s: Room, id: string): Move[] {
       case "founder-scandal":
       case "investor":
         for (const q of others) {
-          if (c.key === "investor" && !q.hand.length) continue;
+          if (["investor", "founder-scandal"].includes(c.key) && !q.hand.length) continue;
           if (
             c.key === "patent-lawsuit" &&
             q.effects.some((c) => c.key === "patent-lawsuit")
@@ -443,8 +434,10 @@ function resolve(s: Room, a: Attack) {
         kind: "reveal",
         actor: actor.id,
         target: target.id,
+        card: a.card,
         cards: structuredClone(target.hand),
       };
+      keep = true;
       break;
     case "ditch": {
       const v = s.ventures.find((v) =>
@@ -456,20 +449,6 @@ function resolve(s: Room, a: Attack) {
   }
   if (!keep) s.discard.push(a.card);
   note(s, `${info(a.card).name} resolves against ${target.name}.`);
-}
-function finishMixer(s: Room) {
-  if (s.pending?.kind !== "mixer") return;
-  const m = s.pending;
-  if (s.players.some((p) => p.hand.length && !m.choices[p.id])) return;
-  const passing = s.players.map((p) =>
-    m.choices[p.id] ? remove(p.hand, m.choices[p.id]) : null,
-  );
-  passing.forEach((c, i) => {
-    if (c) s.players[(i + 1) % s.players.length].hand.push(c);
-  });
-  s.discard.push(m.card);
-  s.pending = null;
-  note(s, "Founder Mixer: all selected cards passed left together.");
 }
 export function apply(s: Room, id: string, c: Command) {
   const same = (a: Command, b: Command) =>
@@ -525,9 +504,14 @@ export function apply(s: Room, id: string, c: Command) {
         note(s, `${s.players[s.turn].name}’s turn.`);
       }
       break;
-    case "ack":
+    case "steal": {
+      const reveal = s.pending as Extract<Pending, { kind: "reveal" }>;
+      p.hand.push(remove(player(s, reveal.target).hand, c.cardId!));
+      s.discard.push(reveal.card);
       s.pending = null;
+      note(s, `${p.name} steals one chosen hand card with Founder Scandal.`);
       break;
+    }
     case "decline":
       note(s, `${p.name} declines the venture. No card play is spent.`);
       s.pending = null;
@@ -548,11 +532,6 @@ export function apply(s: Room, id: string, c: Command) {
       note(s, `${actor.name} and ${p.name} form a Joint Venture.`);
       break;
     }
-    case "mix":
-      (s.pending as Extract<Pending, { kind: "mixer" }>).choices[id] =
-        c.cardId!;
-      finishMixer(s);
-      break;
     case "pass":
       if (s.pending?.kind === "offer") {
         s.discard.push(s.pending.attack.card);
@@ -610,11 +589,6 @@ export function apply(s: Room, id: string, c: Command) {
         draw(s, p, 2);
         s.discard.push(card);
         note(s, `${p.name} uses Investor Backchannel to draw two.`);
-        break;
-      }
-      if (card.key === "founder-mixer") {
-        s.pending = { kind: "mixer", actor: id, card, choices: {} };
-        finishMixer(s);
         break;
       }
       if (card.key === "non-compete") {
@@ -675,7 +649,7 @@ export function allCards(s: Room): Card[] {
     ...s.players.flatMap((p) => [...p.hand, ...p.bank, ...p.effects]),
     ...s.ventures.flatMap((v) => [v.card, ...v.members.map((m) => m.card)]),
   ];
-  if (s.pending?.kind === "attack" || s.pending?.kind === "mixer")
+  if (s.pending?.kind === "attack" || s.pending?.kind === "reveal")
     cards.push(s.pending.card);
   if (s.pending?.kind === "offer") cards.push(s.pending.attack.card);
   return cards.flatMap((c) => [c, ...(c.attachments ?? [])]);
@@ -707,15 +681,6 @@ export function view(s: Room, id: string) {
       actor: pending.actor,
       target: pending.target,
       waiting: [pending.target],
-    };
-  if (pending?.kind === "mixer")
-    publicPending = {
-      kind: "mixer",
-      actor: pending.actor,
-      card: pending.card,
-      waiting: s.players
-        .filter((p) => p.hand.length && !pending.choices[p.id])
-        .map((p) => p.id),
     };
   if (pending?.kind === "reveal")
     publicPending = {

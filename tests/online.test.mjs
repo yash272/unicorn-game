@@ -23,6 +23,9 @@ function ready(n = 3) {
   return s;
 }
 function give(s, id, key, zone = "hand") {
+  // A shuffled deal may already contain every copy of this tactic.
+  const existing = zone === "hand" && s.players.find(p => p.id === id).hand.find(c => c.key === key);
+  if (existing) return existing;
   for (const p of s.players) {
     for (const z of ["hand", "bank", "effects"]) {
       if (p.id === id && z === zone) continue;
@@ -64,11 +67,11 @@ function venture(s) {
   cmd(s, "b", "accept", { assetId: b.id });
   return s;
 }
-test("exact 100-card inventory and private shuffled deck; 3–5 player setup", () => {
+test("exact 98-card inventory and private shuffled deck; 3–5 player setup", () => {
   for (const n of [3, 4, 5]) {
     const s = ready(n);
-    assert.equal(allCards(s).length, 100);
-    assert.equal(new Set(allCards(s).map((c) => c.id)).size, 100);
+    assert.equal(allCards(s).length, 98);
+    assert.equal(new Set(allCards(s).map((c) => c.id)).size, 98);
     assert.equal(s.players[0].hand.length, 5);
     assert.equal(valuation(s, "a"), 50);
     const v = view(s, "a");
@@ -109,7 +112,7 @@ test("Ditch preserves attacker valuation and Golden Handcuffs reverses it", () =
     assert.equal(valuation(s, "a"), blocked ? 50 : 275);
     assert.equal(valuation(s, "b"), blocked ? 275 : 50);
     assert.equal(s.ventures.length, 0);
-    assert.equal(allCards(s).length, 100);
+    assert.equal(allCards(s).length, 98);
   }
 });
 test("Poach + Handcuffs + Offer resolves exactly once", () => {
@@ -125,44 +128,62 @@ test("Poach + Handcuffs + Offer resolves exactly once", () => {
   cmd(s, "a", "react", { cardId: offer.id });
   assert.equal(s.players[0].bank[0].id, asset.id);
   assert.equal(s.pending, null);
-  assert.equal(allCards(s).length, 100);
+  assert.equal(allCards(s).length, 98);
 });
-test("Founder Scandal stays private; Investor takes exactly one random card", () => {
-  const s = ready();
-  active(s);
+test("Founder Scandal privately reveals the whole hand and steals the actor's chosen card", () => {
+  const s = ready(); active(s);
   const scandal = give(s, "a", "founder-scandal");
-  cmd(s, "a", "effect", { cardId: scandal.id, targetId: "b" });
-  reactPass(s);
-  assert.equal(view(s, "a").reveal.length, s.players[1].hand.length);
-  assert.equal(view(s, "c").reveal, undefined);
-  cmd(s, "a", "ack");
-  active(s);
-  const inv = give(s, "a", "investor");
-  const count = s.players[1].hand.length;
-  cmd(s, "a", "effect", { cardId: inv.id, targetId: "b" });
-  reactPass(s);
-  assert.equal(s.players[1].hand.length, count - 1);
-  assert.ok(s.players[1].bank.some((c) => c.id === inv.id));
-  assert.equal(allCards(s).length, 100);
-});
-test("Founder Mixer selections stay secret and resolve simultaneously", () => {
-  const s = ready();
-  active(s);
-  const mixer = give(s, "a", "founder-mixer");
-  cmd(s, "a", "effect", { cardId: mixer.id });
-  const selections = s.players.map((p) => p.hand[0]);
-  for (let i = 0; i < 3; i++) {
-    cmd(s, s.players[i].id, "mix", { cardId: selections[i].id });
-    if (i < 2) {
-      assert.ok(s.players[i].hand.some((c) => c.id === selections[i].id));
-      assert.equal(view(s, "c").pending.choices, undefined);
-    }
+  const before = structuredClone(s.players[1].hand);
+  const chosen = before.at(-1);
+  const actorCount = s.players[0].hand.length;
+  cmd(s, "a", "effect", {cardId: scandal.id, targetId: "b"}); reactPass(s);
+  assert.deepEqual(view(s, "a").reveal, before);
+  for (const id of ["b", "c"]) {
+    assert.equal(view(s, id).reveal, undefined);
+    assert.equal(view(s, id).pending.cards, undefined);
+    assert.ok(!view(s, id).moves.some(m => m.command.type === "steal"));
   }
-  for (let i = 0; i < 3; i++)
-    assert.ok(
-      s.players[(i + 1) % 3].hand.some((c) => c.id === selections[i].id),
-    );
-  assert.equal(allCards(s).length, 100);
+  assert.equal(allCards(s).length, 98);
+  assert.throws(() => cmd(s, "b", "steal", {cardId: chosen.id}));
+  assert.throws(() => cmd(s, "a", "steal", {cardId: scandal.id}));
+  assert.throws(() => cmd(s, "a", "ack"));
+  cmd(s, "a", "steal", {cardId: chosen.id});
+  assert.ok(s.players[0].hand.some(c => c.id === chosen.id));
+  assert.deepEqual(s.players[1].hand, before.slice(0, -1));
+  assert.equal(s.players[0].hand.length, actorCount);
+  assert.equal(s.pending, null);
+  assert.equal(view(s, "a").reveal, undefined);
+  assert.ok(s.discard.some(c => c.id === scandal.id));
+  assert.equal(s.plays, 1);
+  assert.equal(valuation(s, "a"), 50);
+  assert.equal(valuation(s, "b"), 50);
+  assert.equal(allCards(s).length, 98);
+  assert.throws(() => cmd(s, "a", "steal", {cardId: chosen.id}));
+});
+test("Founder Scandal cannot target an empty hand or reveal through Crisis PR Team", () => {
+  const s = ready(); active(s);
+  const scandal = give(s, "a", "founder-scandal");
+  s.deck.push(...s.players[1].hand.splice(0));
+  assert.ok(!legalMoves(s, "a").some(m => m.command.type === "effect" && m.command.cardId === scandal.id && m.command.targetId === "b"));
+  const defense = give(s, "b", "crisis-pr-team");
+  const before = structuredClone(s.players[1].hand);
+  cmd(s, "a", "effect", {cardId: scandal.id, targetId: "b"});
+  cmd(s, "b", "react", {cardId: defense.id});
+  assert.equal(s.pending, null);
+  assert.equal(view(s, "a").reveal, undefined);
+  assert.deepEqual(s.players[1].hand, before.filter(c => c.id !== defense.id));
+  assert.equal(allCards(s).length, 98);
+});
+test("Investor still transfers exactly one random card and adds $50M to its target", () => {
+  const s = ready(); active(s);
+  const inv = give(s, "a", "investor");
+  const before = structuredClone(s.players[1].hand);
+  cmd(s, "a", "effect", {cardId: inv.id, targetId: "b"}); reactPass(s);
+  assert.equal(s.players[1].hand.length, before.length - 1);
+  assert.ok(before.some(c => s.players[0].hand.some(h => h.id === c.id)));
+  assert.ok(s.players[1].bank.some(c => c.id === inv.id));
+  assert.equal(valuation(s, "b"), 100);
+  assert.equal(allCards(s).length, 98);
 });
 test("a lawsuit skips a whole turn, and victory checks only at turn end", () => {
   const s = ready();
@@ -179,7 +200,7 @@ test("a lawsuit skips a whole turn, and victory checks only at turn end", () => 
   cmd(s, "a", "end");
   assert.equal(s.winner, "a");
 });
-test("random legal games conserve all 100 cards and never expose opponents hands", () => {
+test("random legal games conserve all 98 cards and never expose opponents hands", () => {
   for (let game = 0; game < 8; game++) {
     const s = ready(3 + (game % 3));
     for (let t = 0; t < 500 && s.phase !== "finished"; t++) {
@@ -190,8 +211,8 @@ test("random legal games conserve all 100 cards and never expose opponents hands
       const move = options[Math.floor(Math.random() * options.length)];
       apply(s, move.p, move.c);
       const cards = allCards(s);
-      assert.equal(cards.length, 100);
-      assert.equal(new Set(cards.map((c) => c.id)).size, 100);
+      assert.equal(cards.length, 98);
+      assert.equal(new Set(cards.map((c) => c.id)).size, 98);
       for (const p of s.players)
         assert.ok(
           !view(s, p.id).players.some((q) => "hand" in q || "tokenHash" in q),
@@ -254,7 +275,7 @@ test("Cease & Desist returns Growth and pauses everyone for an off-turn hand-lim
   assert.ok(legalMoves(s, "b").every((m) => m.command.type === "discard"));
   cmd(s, "b", "discard", { cardId: growth.id });
   assert.ok(legalMoves(s, "a").some((m) => m.command.type === "end"));
-  assert.equal(allCards(s).length, 100);
+  assert.equal(allCards(s).length, 98);
 });
 test("every printed reaction blocks its eligible attack without banking either card", () => {
   for (const [attack, defender, assetKey] of [
@@ -283,7 +304,7 @@ test("every printed reaction blocks its eligible attack without banking either c
     assert.equal(valuation(s, "b"), value);
     assert.equal(s.players[1].hand.length, hand - 1);
     assert.equal(s.players[1].effects.length, 0);
-    assert.equal(allCards(s).length, 100);
+    assert.equal(allCards(s).length, 98);
   }
 });
 test("Non-Compete protects a shared Employee once; an unblocked shared Poach ends the venture", () => {
@@ -314,7 +335,7 @@ test("Non-Compete protects a shared Employee once; an unblocked shared Poach end
   assert.equal(valuation(s, "a"), 50);
   assert.equal(valuation(s, "b"), 150);
   assert.equal(valuation(s, "c"), 175);
-  assert.equal(allCards(s).length, 100);
+  assert.equal(allCards(s).length, 98);
 });
 test("partners may defend or remove penalties, and declining a venture spends nothing", () => {
   const declined = ready();
@@ -351,7 +372,7 @@ test("partners may defend or remove penalties, and declining a venture spends no
   });
   assert.equal(valuation(s, "a"), 200);
   assert.equal(s.plays, 1);
-  assert.equal(allCards(s).length, 100);
+  assert.equal(allCards(s).length, 98);
 });
 test("Steal Customer only takes Contracts and keeps them banked", () => {
   const s = ready();
@@ -374,7 +395,7 @@ test("Steal Customer only takes Contracts and keeps them banked", () => {
   reactPass(s);
   assert.equal(valuation(s, "a"), 175);
   assert.equal(valuation(s, "b"), 175);
-  assert.equal(allCards(s).length, 100);
+  assert.equal(allCards(s).length, 98);
 });
 test("Backchannel enforces seven cards and never draws itself when reshuffling", () => {
   const s = ready();
@@ -397,5 +418,5 @@ test("Backchannel enforces seven cards and never draws itself when reshuffling",
   assert.equal(empty.players[0].hand.length, before);
   assert.ok(empty.players[0].hand.some((c) => c.id === recyclable.id));
   assert.ok(!empty.players[0].hand.some((c) => c.id === b.id));
-  assert.equal(allCards(empty).length, 100);
+  assert.equal(allCards(empty).length, 98);
 });
