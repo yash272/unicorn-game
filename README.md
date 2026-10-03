@@ -1,22 +1,26 @@
 # UNICORN
 
-A startup card game for 3–5 players. Build a company, share Employees, betray a partner, and reach $1B valuation. About 45 minutes is a playtest target, not a measured duration.
+A startup card game for 3–5 players. Build a company, trade hand cards with an ally, betray a partner, and reach $1B valuation. About 45 minutes is a playtest target, not a measured duration.
 
-## Edition 03
+## Edition 04
 
 The current game tracks valuation only. There is no Cash, upkeep, shared market or separate round-event phase. Each player chooses a $50M Startup and receives 5 random cards. On each turn, draw 1 and play up to 2 cards. Immediately discard down to 7 whenever a draw or exchange exceeds the limit.
 
 Play a card's effect or bank it face-up for its printed valuation. Banked cards cannot activate later. Attacks and defenses bank for $10M. Reactions come from the hand and do not use the two normal card plays. Only one player wins, at the end of their own completed turn.
 
-Investor gives the opponent a face-up +$50M card in exchange for one random card from their hand. Joint Venture shares one Employee from each startup; both partners count both. Ditch gives both shared Employees to the attacker, preserving their valuation while reducing the partner's. Golden Handcuffs reverses Ditch: the defender keeps both instead.
+Investor gives the opponent a face-up +$50M card in exchange for one random card from their hand. Founder Scandal privately reveals a rival's full hand and lets its player choose one card to steal.
 
-The 98-card main deck includes 4 Ditch and 2 Cease & Desist cards. Founder Scandal privately reveals a rival’s full hand and lets its player choose one card to steal. Cease & Desist returns a rival’s Growth card to their hand; Best Lawyers in Town can cancel it.
+Strategic Alliance requires mutual agreement and adds no shared valuation. Either ally may use one normal card play to offer a one-for-one hand trade: the recipient proposes a card in return and the offering player confirms. Only the partners see the two offered faces; hands remain unchanged until agreement. Declined invitations and trades spend no play. Allies may defend each other.
+
+Ditch steals one chosen banked card from your ally and ends the alliance. Golden Handcuffs cancels Ditch and lets the defender choose one of the attacker's banked cards to take instead; if the attacker has none, it still ends the alliance without a transfer. No Offer counter follows. Non-Compete does not block Ditch, and attachments follow their Employee when taken.
+
+The main deck remains 98 cards: 50 worth $50M-$150M and 48 low-value tactics, including 23 Attack cards, 18 Defense cards, 5 Strategic Alliances and 2 Investor Backchannels. Ditch stays at 4. Removed one copy each of Chief Scientist, Elite Engineer, Growth Lead, Viral Launch, Viral Product and Enterprise Contract, and added one each of Poach, Founder Scandal, Cease & Desist, Golden Handcuffs, Best Lawyers in Town and Crisis PR Team. This is a balance proposal for live playtesting, not a measured 45-minute result.
 
 ## Sources and outputs
 
 - `game/cards.json` defines 40 designs and copy counts: 98 main-deck cards, 15 Startup cards, 5 References.
 - `game/rules.json` provides the complete website and PDF rules; `game/RULES.md` is a readable companion.
-- `game/demo.ts` drives eight scripted, mid-game interactive examples. The separate `/play` route runs the full online multiplayer game.
+- `game/demo.ts` drives nine scripted, mid-game interactive examples. The separate `/play` route runs the full online multiplayer game.
 - `game/online.ts` enforces the printed rules for real 3–5 player rooms. The server stores room state in Cloudflare D1, returns only the requesting player's hidden hand, and rejects concurrent or stale moves.
 - `public/cards/` contains direct PNG renders of the original individual-card PDF, including the universal back; the online trial displays these unchanged.
 - `scripts/export-pdfs.py` uses ReportLab to generate the one-page concept sheet, full 118-card print set with rules, and 40 individual card fronts plus a universal back. Fonts are bundled in `public/fonts/`.

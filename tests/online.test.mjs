@@ -56,15 +56,11 @@ function reactPass(s) {
     cmd(s, p, "pass");
   }
 }
-function venture(s) {
+function alliance(s) {
   active(s);
-  give(s, "a", "chief-scientist", "bank");
-  give(s, "b", "rockstar-cto", "bank");
-  const j = give(s, "a", "joint-venture");
-  const a = s.players[0].bank.find((c) => c.key === "chief-scientist");
-  cmd(s, "a", "effect", { cardId: j.id, targetId: "b", assetId: a.id });
-  const b = s.players[1].bank.find((c) => c.key === "rockstar-cto");
-  cmd(s, "b", "accept", { assetId: b.id });
+  const card = give(s, "a", "strategic-alliance");
+  cmd(s, "a", "effect", {cardId: card.id, targetId: "b"});
+  cmd(s, "b", "accept");
   return s;
 }
 test("exact 98-card inventory and private shuffled deck; 3–5 player setup", () => {
@@ -98,22 +94,92 @@ test("turn and hand limits enforced, banked attacks never activate", () => {
   s.plays = 0;
   assert.throws(() => cmd(s, "a", "bank", { cardId: s.players[0].hand[0].id }));
 });
-test("Ditch preserves attacker valuation and Golden Handcuffs reverses it", () => {
-  for (const blocked of [false, true]) {
-    const s = venture(ready());
-    assert.equal(valuation(s, "a"), 275);
-    assert.equal(valuation(s, "b"), 275);
-    active(s);
-    const d = give(s, "a", "ditch");
-    const g = blocked ? give(s, "b", "golden-handcuffs") : null;
-    cmd(s, "a", "effect", { cardId: d.id, targetId: "b" });
-    if (g) cmd(s, "b", "react", { cardId: g.id });
-    else reactPass(s);
-    assert.equal(valuation(s, "a"), blocked ? 50 : 275);
-    assert.equal(valuation(s, "b"), blocked ? 275 : 50);
-    assert.equal(s.ventures.length, 0);
-    assert.equal(allCards(s).length, 98);
+test("alliance formation needs consent, keeps separate valuations and requires no Employees", () => {
+  const s=ready();active(s);
+  const card=give(s,"a","strategic-alliance");
+  cmd(s,"a","effect",{cardId:card.id,targetId:"b"});
+  assert.equal(s.plays,2);assert.equal(s.alliances.length,0);
+  assert.throws(()=>cmd(s,"c","accept"));
+  cmd(s,"b","decline");assert.equal(s.plays,2);
+  assert.ok(s.players[0].hand.some(c=>c.id===card.id));
+  cmd(s,"a","effect",{cardId:card.id,targetId:"b"});cmd(s,"b","accept");
+  assert.equal(s.plays,1);assert.equal(s.alliances.length,1);
+  assert.equal(valuation(s,"a"),50);assert.equal(valuation(s,"b"),50);
+  assert.equal(view(s,"a").players[1].partner,"a");
+  assert.equal(allCards(s).length,98);
+  const another=give(s,"c","strategic-alliance");active(s,"c");
+  assert.ok(!legalMoves(s,"c").some(m=>m.command.type==='effect'&&m.command.cardId===another.id));
+});
+test("allied hand trades stay private and swap only after both players agree", () => {
+  const s=alliance(ready());active(s);
+  const offered=s.players[0].hand[0], returned=s.players[1].hand[1];
+  const aBefore=structuredClone(s.players[0].hand),bBefore=structuredClone(s.players[1].hand);
+  cmd(s,"a","trade",{cardId:offered.id,targetId:"b"});
+  assert.deepEqual(s.players[0].hand,aBefore);assert.equal(s.plays,2);
+  assert.equal(view(s,"b").trade.offered.id,offered.id);
+  assert.equal(view(s,"c").trade,undefined);
+  assert.equal(view(s,"c").pending.cardId,undefined);
+  assert.ok(!JSON.stringify(view(s,"c").pending).includes(offered.id));
+  assert.throws(()=>cmd(s,"c","trade-response",{cardId:s.players[2].hand[0].id}));
+  assert.throws(()=>cmd(s,"a","trade-accept"));
+  cmd(s,"b","trade-response",{cardId:returned.id});
+  assert.deepEqual(s.players[1].hand,bBefore);
+  assert.equal(view(s,"a").trade.returned.id,returned.id);
+  assert.throws(()=>cmd(s,"b","trade-accept"));
+  cmd(s,"a","trade-accept");
+  assert.deepEqual(s.players[0].hand,[...aBefore.filter(c=>c.id!==offered.id),returned]);
+  assert.deepEqual(s.players[1].hand,[...bBefore.filter(c=>c.id!==returned.id),offered]);
+  assert.equal(s.plays,1);assert.equal(s.pending,null);
+  assert.equal(s.players[0].hand.length,aBefore.length);assert.equal(s.players[1].hand.length,bBefore.length);
+  assert.equal(valuation(s,"a"),50);assert.equal(valuation(s,"b"),50);
+  assert.equal(allCards(s).length,98);
+  assert.throws(()=>cmd(s,"a","trade-accept"));
+});
+test("declined trades spend no play and cannot be offered off-turn, outside an alliance or to an empty hand", () => {
+  const s=alliance(ready());active(s);
+  const card=s.players[0].hand[0];
+  assert.throws(()=>cmd(s,"b","trade",{cardId:s.players[1].hand[0].id,targetId:"a"}));
+  assert.throws(()=>cmd(s,"a","trade",{cardId:card.id,targetId:"c"}));
+  cmd(s,"a","trade",{cardId:card.id,targetId:"b"});cmd(s,"b","decline");
+  assert.equal(s.plays,2);assert.ok(s.players[0].hand.some(c=>c.id===card.id));
+  cmd(s,"a","trade",{cardId:card.id,targetId:"b"});
+  cmd(s,"b","trade-response",{cardId:s.players[1].hand[0].id});cmd(s,"a","decline");
+  assert.equal(s.plays,2);assert.ok(s.players[0].hand.some(c=>c.id===card.id));
+  cmd(s,"a","trade",{cardId:card.id,targetId:"b"});
+  cmd(s,"b","trade-response",{cardId:s.players[1].hand[0].id});cmd(s,"b","decline");
+  assert.equal(s.plays,2);assert.ok(s.players[0].hand.some(c=>c.id===card.id));
+  s.deck.push(...s.players[1].hand.splice(0));
+  assert.ok(!legalMoves(s,"a").some(m=>m.command.type==='trade'));
+  s.plays=0;assert.ok(!legalMoves(s,"a").some(m=>m.command.type==='trade'));
+});
+test("Ditch steals the chosen banked card; Handcuffs lets the defender choose the reverse theft", () => {
+  for(const blocked of [false,true]) {
+    const s=alliance(ready());active(s);
+    const scientist=give(s,"a","chief-scientist","bank");
+    const cto=give(s,"b","rockstar-cto","bank");
+    const ditch=give(s,"a","ditch");
+    const gh=blocked?give(s,"b","golden-handcuffs"):null;
+    assert.equal(valuation(s,"a"),175);assert.equal(valuation(s,"b"),150);
+    cmd(s,"a","effect",{cardId:ditch.id,targetId:"b",assetId:cto.id});
+    if(gh) {
+      assert.throws(()=>cmd(s,"b","react",{cardId:gh.id}));
+      cmd(s,"b","react",{cardId:gh.id,assetId:scientist.id});
+    } else reactPass(s);
+    assert.equal(valuation(s,"a"),blocked?50:275);
+    assert.equal(valuation(s,"b"),blocked?275:50);
+    assert.equal(s.alliances.length,0);assert.equal(allCards(s).length,98);
+    assert.equal(s.players[blocked?1:0].bank.length,2);
   }
+});
+test("Handcuffs still cancels Ditch when the attacker has no banked card; Ditch needs a partner asset",()=>{
+  const s=alliance(ready());active(s);
+  const ditch=give(s,"a","ditch");
+  assert.ok(!legalMoves(s,"a").some(m=>m.command.type==='effect'&&m.command.cardId===ditch.id));
+  const asset=give(s,"b","elite-engineer","bank"),gh=give(s,"b","golden-handcuffs");
+  cmd(s,"a","effect",{cardId:ditch.id,targetId:"b",assetId:asset.id});
+  cmd(s,"b","react",{cardId:gh.id});
+  assert.equal(valuation(s,"a"),50);assert.equal(valuation(s,"b"),125);
+  assert.equal(s.alliances.length,0);assert.equal(s.pending,null);assert.equal(allCards(s).length,98);
 });
 test("Poach + Handcuffs + Offer resolves exactly once", () => {
   const s = ready();
@@ -194,7 +260,7 @@ test("a lawsuit skips a whole turn, and victory checks only at turn end", () => 
   assert.equal(s.players[1].effects.length, 0);
   active(s);
   for (let i = 0; i < 9; i++)
-    give(s, "a", i < 5 ? "chief-scientist" : "viral-launch", "bank");
+    give(s, "a", i < 4 ? "chief-scientist" : i < 7 ? "viral-launch" : "rockstar-cto", "bank");
   assert.ok(valuation(s, "a") >= 1000);
   assert.equal(s.phase, "playing");
   cmd(s, "a", "end");
@@ -307,72 +373,36 @@ test("every printed reaction blocks its eligible attack without banking either c
     assert.equal(allCards(s).length, 98);
   }
 });
-test("Non-Compete protects a shared Employee once; an unblocked shared Poach ends the venture", () => {
-  const s = venture(ready());
-  active(s);
-  const employee = s.ventures[0].members[0].card,
-    nc = give(s, "a", "non-compete");
-  cmd(s, "a", "effect", { cardId: nc.id, assetId: employee.id });
-  assert.equal(valuation(s, "a"), 275);
-  active(s, "c");
-  const poach = give(s, "c", "poach");
-  cmd(s, "c", "effect", {
-    cardId: poach.id,
-    targetId: "a",
-    assetId: employee.id,
-  });
-  assert.equal(s.pending, null);
-  assert.equal(employee.attachments.length, 0);
-  assert.equal(s.ventures.length, 1);
-  const second = give(s, "c", "poach");
-  cmd(s, "c", "effect", {
-    cardId: second.id,
-    targetId: "a",
-    assetId: employee.id,
-  });
-  reactPass(s);
-  assert.equal(s.ventures.length, 0);
-  assert.equal(valuation(s, "a"), 50);
-  assert.equal(valuation(s, "b"), 150);
-  assert.equal(valuation(s, "c"), 175);
-  assert.equal(allCards(s).length, 98);
+test("Non-Compete blocks Poach once, and taking an ally's Employee does not end the alliance", () => {
+  const s=alliance(ready());active(s);
+  const employee=give(s,"a","chief-scientist","bank"),nc=give(s,"a","non-compete");
+  cmd(s,"a","effect",{cardId:nc.id,assetId:employee.id});
+  active(s,"c");
+  const poach=give(s,"c","poach");
+  cmd(s,"c","effect",{cardId:poach.id,targetId:"a",assetId:employee.id});
+  assert.equal(s.pending,null);assert.equal(employee.attachments.length,0);
+  assert.equal(s.alliances.length,1);
+  const second=give(s,"c","poach");
+  cmd(s,"c","effect",{cardId:second.id,targetId:"a",assetId:employee.id});reactPass(s);
+  assert.equal(s.alliances.length,1);assert.equal(valuation(s,"a"),50);
+  assert.equal(valuation(s,"b"),50);assert.equal(valuation(s,"c"),175);
+  assert.equal(allCards(s).length,98);
 });
-test("partners may defend or remove penalties, and declining a venture spends nothing", () => {
-  const declined = ready();
-  active(declined);
-  const employee = give(declined, "a", "chief-scientist", "bank");
-  give(declined, "b", "elite-engineer", "bank");
-  const j = give(declined, "a", "joint-venture");
-  cmd(declined, "a", "effect", {
-    cardId: j.id,
-    targetId: "b",
-    assetId: employee.id,
-  });
-  cmd(declined, "b", "decline");
-  assert.equal(declined.plays, 2);
-  assert.ok(declined.players[0].hand.some((c) => c.id === j.id));
-  const s = venture(ready());
-  active(s, "c");
-  const attack = give(s, "c", "pr-crisis"),
-    defend = give(s, "b", "crisis-pr-team");
-  cmd(s, "c", "effect", { cardId: attack.id, targetId: "a" });
-  cmd(s, "a", "pass");
-  cmd(s, "b", "react", { cardId: defend.id });
-  assert.equal(s.pending, null);
-  assert.equal(s.players[0].effects.length, 0);
-  give(s, "a", "pr-crisis", "effects");
-  give(s, "a", "pr-crisis", "effects");
-  assert.equal(valuation(s, "a"), 125);
-  active(s, "b");
-  const cleanup = give(s, "b", "crisis-pr-team");
-  cmd(s, "b", "effect", {
-    cardId: cleanup.id,
-    targetId: "a",
-    assetId: s.players[0].effects[0].id,
-  });
-  assert.equal(valuation(s, "a"), 200);
-  assert.equal(s.plays, 1);
-  assert.equal(allCards(s).length, 98);
+test("allies may defend or remove penalties, but an attacker cannot defend against their own attack", () => {
+  const s=alliance(ready());give(s,"a","chief-scientist","bank");active(s,"c");
+  const attack=give(s,"c","pr-crisis"),defend=give(s,"b","crisis-pr-team");
+  cmd(s,"c","effect",{cardId:attack.id,targetId:"a"});cmd(s,"a","pass");
+  cmd(s,"b","react",{cardId:defend.id});assert.equal(s.pending,null);
+  give(s,"a","pr-crisis","effects");give(s,"a","pr-crisis","effects");
+  assert.equal(valuation(s,"a"),25);active(s,"b");
+  const cleanup=give(s,"b","crisis-pr-team");
+  cmd(s,"b","effect",{cardId:cleanup.id,targetId:"a",assetId:s.players[0].effects[0].id});
+  assert.equal(valuation(s,"a"),100);assert.equal(s.plays,1);
+  active(s,"a");const betray=give(s,"a","pr-crisis");
+  cmd(s,"a","effect",{cardId:betray.id,targetId:"b"});
+  assert.deepEqual(s.pending.responders,["b"]);
+  assert.ok(!legalMoves(s,"a").some(m=>m.command.type==='react'||m.command.type==='pass'));
+  reactPass(s);assert.equal(s.alliances.length,1);assert.equal(allCards(s).length,98);
 });
 test("Steal Customer only takes Contracts and keeps them banked", () => {
   const s = ready();

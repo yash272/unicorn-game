@@ -19,7 +19,7 @@ type Player = {
   startup?: string;
   choices: string[];
 };
-type Venture = { card: Card; members: { owner: string; card: Card }[] };
+type Alliance = { card: Card; players: [string, string] };
 type Attack = {
   kind: "attack";
   actor: string;
@@ -33,12 +33,12 @@ type Pending =
   | Attack
   | { kind: "offer"; attack: Attack }
   | {
-      kind: "venture";
+      kind: "alliance";
       actor: string;
       target: string;
       cardId: string;
-      assetId: string;
     }
+  | { kind: "trade"; actor: string; target: string; cardId: string; returnCardId?: string }
   | { kind: "reveal"; actor: string; target: string; card: Card; cards: Card[] };
 export type Room = {
   rulesEdition: string;
@@ -47,7 +47,7 @@ export type Room = {
   players: Player[];
   deck: Card[];
   discard: Card[];
-  ventures: Venture[];
+  alliances: Alliance[];
   turn: number;
   step: "draw" | "act";
   plays: number;
@@ -98,7 +98,7 @@ export function createRoom(id: string, name: string, tokenHash: string): Room {
     ],
     deck: [],
     discard: [],
-    ventures: [],
+    alliances: [],
     turn: 0,
     step: "draw",
     plays: 2,
@@ -122,25 +122,10 @@ export function joinRoom(s: Room, id: string, name: string, tokenHash: string) {
   });
 }
 export function partner(s: Room, id: string) {
-  return s.ventures
-    .find((v) => v.members.some((m) => m.owner === id))
-    ?.members.find((m) => m.owner !== id)?.owner;
-}
-function owned(s: Room, id: string) {
-  return [
-    ...player(s, id).bank,
-    ...s.ventures.flatMap((v) =>
-      v.members.filter((m) => m.owner === id).map((m) => m.card),
-    ),
-  ];
+  return s.alliances.find(a => a.players.includes(id))?.players.find(p => p !== id);
 }
 function visibleAssets(s: Room, id: string) {
-  return [
-    ...player(s, id).bank,
-    ...s.ventures
-      .filter((v) => v.members.some((m) => m.owner === id))
-      .flatMap((v) => v.members.map((m) => m.card)),
-  ];
+  return player(s, id).bank;
 }
 export function valuation(s: Room, id: string) {
   const p = player(s, id);
@@ -197,7 +182,7 @@ function start(s: Room) {
       ),
   );
   s.discard = [];
-  s.ventures = [];
+  s.alliances = [];
   s.pending = null;
   s.winner = undefined;
   s.phase = "setup";
@@ -274,8 +259,12 @@ export function legalMoves(s: Room, id: string): Move[] {
     ) {
       add("Pass on defending", "pass");
       for (const c of p.hand)
-        if (defense(s, c, pending))
-          add(`Defend with ${info(c).name}`, "react", { cardId: c.id });
+        if (defense(s, c, pending)) {
+          if (pending.card.key === "ditch" && c.key === "golden-handcuffs" && player(s, pending.actor).bank.length) {
+            for (const asset of player(s, pending.actor).bank)
+              add(`Reverse Ditch: take ${info(asset).name}`, "react", {cardId: c.id, assetId: asset.id});
+          } else add(`Defend with ${info(c).name}`, "react", { cardId: c.id });
+        }
     }
     if (pending.kind === "offer" && pending.attack.actor === id) {
       add("Let Golden Handcuffs block it", "pass");
@@ -283,11 +272,19 @@ export function legalMoves(s: Room, id: string): Move[] {
         if (c.key === "offer-they-cant-refuse")
           add("Play Offer They Can’t Refuse", "react", { cardId: c.id });
     }
-    if (pending.kind === "venture" && pending.target === id) {
-      add("Decline partnership", "decline");
-      for (const c of p.bank)
-        if (info(c).category === "Employee")
-          add(`Agree and share ${info(c).name}`, "accept", { assetId: c.id });
+    if (pending.kind === "alliance" && pending.target === id) {
+      add("Decline alliance", "decline");
+      add("Agree to Strategic Alliance", "accept");
+    }
+    if (pending.kind === "trade") {
+      if (pending.actor === id) {
+        add("Withdraw trade", "decline");
+        if (pending.returnCardId) add("Agree and swap these two cards", "trade-accept");
+      }
+      if (pending.target === id) {
+        add(pending.returnCardId ? "Withdraw trade" : "Decline trade", "decline");
+        if (!pending.returnCardId) for (const card of p.hand) add(`Offer ${info(card).name} in return`, "trade-response", {cardId:card.id});
+      }
     }
     if (pending.kind === "reveal" && pending.actor === id)
       for (const c of player(s, pending.target).hand)
@@ -305,6 +302,8 @@ export function legalMoves(s: Room, id: string): Move[] {
     ally = partner(s, id);
   for (const c of p.hand) {
     const d = info(c);
+    if (ally && player(s, ally).hand.length)
+      add(`Offer ${d.name} in a hand trade with ${player(s, ally).name}`, "trade", {cardId:c.id, targetId:ally});
     add(
       d.role === "asset"
         ? `Add ${d.name} (+$${d.value}M)`
@@ -318,26 +317,18 @@ export function legalMoves(s: Room, id: string): Move[] {
       case "investor-backchannel":
         effect("Draw two cards");
         break;
-      case "joint-venture":
+      case "strategic-alliance":
         if (!ally)
-          for (const q of others.filter(
-            (q) =>
-              !partner(s, q.id) &&
-              q.bank.some((c) => info(c).category === "Employee"),
-          ))
-            for (const own of p.bank.filter(
-              (c) => info(c).category === "Employee",
-            ))
-              effect(`Partner with ${q.name}; share your ${info(own).name}`, {
-                targetId: q.id,
-                assetId: own.id,
-              });
+          for (const q of others.filter(q => !partner(s, q.id)))
+            effect(`Invite ${q.name} to Strategic Alliance`, {targetId:q.id});
         break;
       case "ditch":
-        if (ally) effect(`Ditch ${player(s, ally).name}`, { targetId: ally });
+        if (ally)
+          for (const asset of player(s, ally).bank)
+            effect(`Ditch ${player(s, ally).name}: take ${info(asset).name}`, {targetId:ally, assetId:asset.id});
         break;
       case "non-compete":
-        for (const own of owned(s, id).filter(
+        for (const own of visibleAssets(s, id).filter(
           (c) => info(c).category === "Employee",
         ))
           effect(`Protect your ${info(own).name}`, { assetId: own.id });
@@ -388,23 +379,14 @@ export function legalMoves(s: Room, id: string): Move[] {
   }
   return moves;
 }
-function closeVenture(s: Room, v: Venture, winner?: string, taken?: string) {
-  for (const m of v.members) {
-    if (m.card.id !== taken) player(s, winner ?? m.owner).bank.push(m.card);
-  }
-  s.discard.push(v.card);
-  s.ventures.splice(s.ventures.indexOf(v), 1);
+function closeAlliance(s: Room, id: string) {
+  const a=s.alliances.find(a => a.players.includes(id));
+  if (!a) throw Error("The alliance is no longer active.");
+  s.discard.push(a.card);
+  s.alliances.splice(s.alliances.indexOf(a),1);
 }
 function takeAsset(s: Room, target: string, assetId: string) {
-  const v = s.ventures.find((v) =>
-    v.members.some((m) => m.card.id === assetId),
-  );
-  if (v) {
-    const c = v.members.find((m) => m.card.id === assetId)!.card;
-    closeVenture(s, v, undefined, assetId);
-    return c;
-  }
-  return remove(player(s, target).bank, assetId);
+  return remove(player(s,target).bank,assetId);
 }
 function resolve(s: Room, a: Attack) {
   const target = player(s, a.target),
@@ -439,13 +421,10 @@ function resolve(s: Room, a: Attack) {
       };
       keep = true;
       break;
-    case "ditch": {
-      const v = s.ventures.find((v) =>
-        v.members.some((m) => m.owner === actor.id),
-      )!;
-      closeVenture(s, v, actor.id);
+    case "ditch":
+      actor.bank.push(takeAsset(s, target.id, a.assetId!));
+      closeAlliance(s, actor.id);
       break;
-    }
   }
   if (!keep) s.discard.push(a.card);
   note(s, `${info(a.card).name} resolves against ${target.name}.`);
@@ -513,23 +492,33 @@ export function apply(s: Room, id: string, c: Command) {
       break;
     }
     case "decline":
-      note(s, `${p.name} declines the venture. No card play is spent.`);
+      note(s, `${p.name} declines the ${s.pending?.kind === "trade" ? "trade" : "alliance"}. No card play is spent.`);
       s.pending = null;
       break;
     case "accept": {
-      const v = s.pending as Extract<Pending, { kind: "venture" }>;
-      const actor = player(s, v.actor);
-      const card = remove(actor.hand, v.cardId);
-      s.ventures.push({
-        card,
-        members: [
-          { owner: actor.id, card: remove(actor.bank, v.assetId) },
-          { owner: id, card: remove(p.bank, c.assetId!) },
-        ],
-      });
+      const invitation=s.pending as Extract<Pending,{kind:"alliance"}>;
+      const actor=player(s,invitation.actor);
+      s.alliances.push({card:remove(actor.hand,invitation.cardId),players:[actor.id,id]});
       s.plays--;
-      s.pending = null;
-      note(s, `${actor.name} and ${p.name} form a Joint Venture.`);
+      s.pending=null;
+      note(s,`${actor.name} and ${p.name} form a Strategic Alliance. Valuations stay separate.`);
+      break;
+    }
+    case "trade":
+      s.pending={kind:"trade",actor:id,target:c.targetId!,cardId:c.cardId!};
+      note(s,`${p.name} offers a private hand trade to ${player(s,c.targetId!).name}.`);
+      break;
+    case "trade-response":
+      (s.pending as Extract<Pending,{kind:"trade"}>).returnCardId=c.cardId!;
+      note(s,`${p.name} offers a card in return. Both cards stay in hand until agreement.`);
+      break;
+    case "trade-accept": {
+      const trade=s.pending as Extract<Pending,{kind:"trade"}>;
+      const target=player(s,trade.target);
+      const offered=remove(p.hand,trade.cardId),returned=remove(target.hand,trade.returnCardId!);
+      p.hand.push(returned);target.hand.push(offered);
+      s.plays--;s.pending=null;
+      note(s,`${p.name} and ${target.name} swap one hand card each. Valuations stay unchanged.`);
       break;
     }
     case "pass":
@@ -557,11 +546,9 @@ export function apply(s: Room, id: string, c: Command) {
         break;
       }
       if (a.card.key === "ditch") {
-        const v = s.ventures.find((v) =>
-          v.members.some((m) => m.owner === a.actor),
-        )!;
-        closeVenture(s, v, a.target);
-        note(s, `${p.name} reverses Ditch and keeps both Employees.`);
+        if (c.assetId) p.bank.push(takeAsset(s,a.actor,c.assetId));
+        closeAlliance(s,a.actor);
+        note(s, `${p.name} reverses Ditch${c.assetId ? " and takes one banked card" : ""}. The alliance ends.`);
       }
       s.discard.push(a.card);
       s.pending = null;
@@ -569,17 +556,16 @@ export function apply(s: Room, id: string, c: Command) {
     }
     case "effect": {
       const handCard = p.hand.find((x) => x.id === c.cardId)!;
-      if (handCard.key === "joint-venture") {
+      if (handCard.key === "strategic-alliance") {
         s.pending = {
-          kind: "venture",
+          kind: "alliance",
           actor: id,
           target: c.targetId!,
           cardId: handCard.id,
-          assetId: c.assetId!,
         };
         note(
           s,
-          `${p.name} invites ${player(s, c.targetId!).name} to a Joint Venture.`,
+          `${p.name} invites ${player(s, c.targetId!).name} to a Strategic Alliance.`,
         );
         break;
       }
@@ -592,7 +578,7 @@ export function apply(s: Room, id: string, c: Command) {
         break;
       }
       if (card.key === "non-compete") {
-        const employee = owned(s, id).find((x) => x.id === c.assetId)!;
+        const employee = visibleAssets(s, id).find((x) => x.id === c.assetId)!;
         (employee.attachments ??= []).push(card);
         note(s, `${p.name} protects ${info(employee).name}.`);
         break;
@@ -617,7 +603,7 @@ export function apply(s: Room, id: string, c: Command) {
         assetId: c.assetId,
         responders: [
           c.targetId!,
-          ...(ally && card.key !== "ditch" ? [ally] : []),
+          ...(ally && ally !== id && card.key !== "ditch" ? [ally] : []),
         ],
         passed: [],
       };
@@ -647,7 +633,7 @@ export function allCards(s: Room): Card[] {
     ...s.deck,
     ...s.discard,
     ...s.players.flatMap((p) => [...p.hand, ...p.bank, ...p.effects]),
-    ...s.ventures.flatMap((v) => [v.card, ...v.members.map((m) => m.card)]),
+    ...s.alliances.map(a => a.card),
   ];
   if (s.pending?.kind === "attack" || s.pending?.kind === "reveal")
     cards.push(s.pending.card);
@@ -675,13 +661,15 @@ export function view(s: Room, id: string) {
       card: pending.attack.card,
       waiting: [pending.attack.actor],
     };
-  if (pending?.kind === "venture")
+  if (pending?.kind === "alliance")
     publicPending = {
-      kind: "venture",
+      kind: "alliance",
       actor: pending.actor,
       target: pending.target,
       waiting: [pending.target],
     };
+  if (pending?.kind === "trade")
+    publicPending={kind:"trade",actor:pending.actor,target:pending.target,waiting:[pending.returnCardId ? pending.actor : pending.target]};
   if (pending?.kind === "reveal")
     publicPending = {
       kind: "reveal",
@@ -712,7 +700,10 @@ export function view(s: Room, id: string) {
     choices: p.choices,
     deckCount: s.deck.length,
     discard: s.discard,
-    ventures: s.ventures,
+    alliances: s.alliances,
+    trade: pending?.kind === "trade" && [pending.actor,pending.target].includes(id)
+      ? {actor:pending.actor,target:pending.target,offered:player(s,pending.actor).hand.find(c=>c.id===pending.cardId)!,returned:player(s,pending.target).hand.find(c=>c.id===pending.returnCardId)}
+      : undefined,
     pending: publicPending,
     reveal:
       pending?.kind === "reveal" && pending.actor === id

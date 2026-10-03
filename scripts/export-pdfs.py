@@ -103,10 +103,10 @@ def crop(c,x,y):
 def page_header(c,kicker,heading,page):
     rect(c,0,0,792,612,'paper');text(c,'UNICORN / '+kicker,36,578,9,'Bold');text(c,heading,36,533,37,'Display')
     c.setStrokeColor(C['ink']);c.line(36,516,756,516)
-    text(c,'EDITION 03 • VALUATION ONLY • EARLY PLAYTEST',36,20,7,'Bold','muted');text(c,f'{page:02}',741,20,8,'Bold')
+    text(c,'EDITION 04 • VALUATION ONLY • EARLY PLAYTEST',36,20,7,'Bold','muted');text(c,f'{page:02}',741,20,8,'Bold')
 
 def printable():
-    path=OUT/'UNICORN-printable-deck.pdf';c=canvas.Canvas(str(path),pagesize=(792,612));c.setTitle('UNICORN | Complete printable deck and rules | Edition 03')
+    path=OUT/'UNICORN-printable-deck.pdf';c=canvas.Canvas(str(path),pagesize=(792,612));c.setTitle('UNICORN | Complete printable deck and rules | Edition 04')
     page_header(c,'PRINT & PLAY','ONE BILLION. ONE WINNER.',1)
     text(c,'118',36,397,100,'Heavy');text(c,'PHYSICAL CARDS',42,370,12,'Bold')
     text(c,'3–5',300,411,58,'Heavy');text(c,'PLAYERS',303,385,11,'Bold')
@@ -137,19 +137,19 @@ def printable():
     for sheet in range(math.ceil(len(deck)/6)):
         for i,d in enumerate(deck[sheet*6:sheet*6+6]):
             x=108+(i%3)*198;y=315-(i//3)*270;front(c,d,x,y);crop(c,x,y)
-        text(c,f'UNICORN • ED.03 • SHEET {sheet+1:02}/20 • FRONTS • PRINT AT 100%',108,20,7,'Bold','muted');c.showPage()
+        text(c,f'UNICORN • ED.04 • SHEET {sheet+1:02}/20 • FRONTS • PRINT AT 100%',108,20,7,'Bold','muted');c.showPage()
         for i in range(len(deck[sheet*6:sheet*6+6])):
             x=108+(2-i%3)*198;y=315-(i//3)*270;back(c,x,y);crop(c,x,y)
-        text(c,f'UNICORN • ED.03 • SHEET {sheet+1:02}/20 • BACKS • SHORT-EDGE DUPLEX',108,20,7,'Bold','muted');c.showPage()
+        text(c,f'UNICORN • ED.04 • SHEET {sheet+1:02}/20 • BACKS • SHORT-EDGE DUPLEX',108,20,7,'Bold','muted');c.showPage()
     c.save();return path
 
 def individual():
-    path=OUT/'UNICORN-individual-cards.pdf';c=canvas.Canvas(str(path),pagesize=(180,252));c.setTitle(f'UNICORN | {len(CARDS)} card designs + universal back | Edition 03')
+    path=OUT/'UNICORN-individual-cards.pdf';c=canvas.Canvas(str(path),pagesize=(180,252));c.setTitle(f'UNICORN | {len(CARDS)} card designs + universal back | Edition 04')
     for card in CARDS:front(c,card);c.showPage()
     back(c);c.showPage();c.save();return path
 
 def concept():
-    path=OUT/'UNICORN-founder-concept-one-page.pdf';c=canvas.Canvas(str(path),pagesize=(612,792));c.setTitle('UNICORN | The concept in one page | Edition 03')
+    path=OUT/'UNICORN-founder-concept-one-page.pdf';c=canvas.Canvas(str(path),pagesize=(612,792));c.setTitle('UNICORN | The concept in one page | Edition 04')
     rect(c,0,0,612,792,'paper');rect(c,0,664,612,128,'ink')
     text(c,'UNICORN',28,729,55,'Heavy','lime');text(c,'BUILD A STARTUP. BETRAY YOUR FRIENDS.',30,703,14,'Display','paper')
     text(c,'First to $1B valuation wins. Only one of you.',30,679,12,'Body','paper')
@@ -165,13 +165,13 @@ def concept():
     para(c,'Bank a tactic for +$10M, or keep it to attack or defend. A banked card cannot use its effect later. Defenses from hand are free reactions.',40,433,530,9,'Body','paper',11)
     text(c,'NINE CARDS THAT EXPLAIN THE GAME',28,385,17,'Display')
     examples=[
-        ('chief-scientist','Place in your startup. You may share this Employee in a Joint Venture.'),
-        ('poach','Move a rival’s positive-value card into your startup. Shared Employees count.'),
+        ('chief-scientist','Bank in your own startup. It adds $125M; allies keep separate scores.'),
+        ('poach','Move 1 banked card from a rival’s startup into yours. You gain its value; they lose it.'),
         ('investor','Give the target +$50M. Take 1 random card from their hidden hand.'),
         ('founder-scandal','Privately see a rival’s complete hand. Choose 1 card to steal into your hand.'),
-        ('joint-venture','Both agree and commit 1 Employee each. Both count both Employees.'),
-        ('ditch','Keep both shared Employees. Your value stays; your partner loses theirs.'),
-        ('golden-handcuffs','Cancel Poach. Against Ditch, defender keeps both Employees; the venture ends.'),
+        ('strategic-alliance','Ally up by agreement. Spend 1 card play on an agreed 1-for-1 hand trade.'),
+        ('ditch','Steal 1 banked card from your ally. You gain its value; they lose it. The alliance ends.'),
+        ('golden-handcuffs','Cancel Poach. Reverse Ditch: take 1 banked card from the attacker. End the alliance.'),
         ('cease-and-desist','Return a rival’s Growth card to their hand. Best Lawyers in Town can block this.'),
         ('pr-crisis','Penalty stays beside the rival until Crisis PR Team removes it.')]
     for i,(key,body) in enumerate(examples):

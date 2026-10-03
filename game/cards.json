@@ -1,5 +1,5 @@
 {
-  "edition": "03",
+  "edition": "04",
   "title": "Valuation-only edition",
   "players": [
     3,
@@ -90,10 +90,10 @@
       "category": "Employee",
       "role": "asset",
       "value": 125,
-      "copies": 5,
+      "copies": 4,
       "icon": "FlaskConical",
       "color": "cyan",
-      "effect": "Place face-up in your startup and add its valuation. You may commit this Employee to a Joint Venture.",
+      "effect": "Place face-up in your startup and add its valuation.",
       "flavor": "Big brain. Bigger bargaining chip.",
       "id": "U06"
     },
@@ -106,7 +106,7 @@
       "copies": 5,
       "icon": "CodeXml",
       "color": "cyan",
-      "effect": "Place face-up in your startup and add its valuation. You may commit this Employee to a Joint Venture.",
+      "effect": "Place face-up in your startup and add its valuation.",
       "flavor": "Ships code. Starts arguments.",
       "id": "U07"
     },
@@ -116,10 +116,10 @@
       "category": "Employee",
       "role": "asset",
       "value": 75,
-      "copies": 5,
+      "copies": 4,
       "icon": "Cpu",
       "color": "cyan",
-      "effect": "Place face-up in your startup and add its valuation. You may commit this Employee to a Joint Venture.",
+      "effect": "Place face-up in your startup and add its valuation.",
       "flavor": "It works on their machine.",
       "id": "U08"
     },
@@ -129,10 +129,10 @@
       "category": "Employee",
       "role": "asset",
       "value": 100,
-      "copies": 4,
+      "copies": 3,
       "icon": "Megaphone",
       "color": "cyan",
-      "effect": "Place face-up in your startup and add its valuation. You may commit this Employee to a Joint Venture.",
+      "effect": "Place face-up in your startup and add its valuation.",
       "flavor": "Everything is a growth experiment.",
       "id": "U09"
     },
@@ -145,7 +145,7 @@
       "copies": 3,
       "icon": "Calculator",
       "color": "cyan",
-      "effect": "Place face-up in your startup and add its valuation. You may commit this Employee to a Joint Venture.",
+      "effect": "Place face-up in your startup and add its valuation.",
       "flavor": "The numbers are technically numbers.",
       "id": "U10"
     },
@@ -169,7 +169,7 @@
       "category": "Growth",
       "role": "asset",
       "value": 100,
-      "copies": 4,
+      "copies": 3,
       "icon": "Building2",
       "color": "lime",
       "effect": "Place face-up in your startup and add its valuation.",
@@ -197,7 +197,7 @@
       "category": "Growth",
       "role": "asset",
       "value": 125,
-      "copies": 4,
+      "copies": 3,
       "icon": "Rocket",
       "color": "lime",
       "effect": "Place face-up in your startup and add its valuation.",
@@ -211,7 +211,7 @@
       "category": "Growth",
       "role": "asset",
       "value": 125,
-      "copies": 5,
+      "copies": 4,
       "icon": "TrendingUp",
       "color": "lime",
       "effect": "Place face-up in your startup and add its valuation.",
@@ -296,10 +296,10 @@
       "category": "Attack",
       "role": "tactic",
       "value": 10,
-      "copies": 4,
+      "copies": 5,
       "icon": "UserRoundMinus",
       "color": "coral",
-      "effect": "Take 1 positive-value card from a rival's startup into yours. You may take a shared Employee. Startup identity cards and active effect cards cannot be taken. Discard this.",
+      "effect": "Take 1 positive-value banked card from a rival's startup into yours. Startup identity cards and active effect cards cannot be taken. Discard this.",
       "flavor": "Nice startup. Can we borrow something?",
       "id": "U21",
       "outcome": {
@@ -366,7 +366,7 @@
       "category": "Attack",
       "role": "tactic",
       "value": 10,
-      "copies": 2,
+      "copies": 3,
       "icon": "Megaphone",
       "color": "coral",
       "effect": "Privately look at every card in 1 rival's hand. Choose 1 to steal into your hand. Only you see the hand. Discard this card.",
@@ -402,7 +402,7 @@
       "category": "Attack",
       "role": "tactic",
       "value": 10,
-      "copies": 2,
+      "copies": 3,
       "icon": "Gavel",
       "color": "coral",
       "effect": "Return 1 Growth card from a rival's startup to their hand. They immediately discard down to 7 if needed. Best Lawyers in Town can block this. Discard this.",
@@ -419,10 +419,10 @@
       "category": "Defense",
       "role": "reaction",
       "value": 10,
-      "copies": 4,
+      "copies": 5,
       "icon": "LockKeyhole",
       "color": "yellow",
-      "effect": "React to Poach: cancel it. React to Ditch against you: take both shared Employees and end the venture. Discard this card.",
+      "effect": "React to Poach: cancel it. React to Ditch against you: cancel it, end the alliance, and take 1 banked card from the attacker, if any. Discard this.",
       "flavor": "Sorry. They're emotionally vested.",
       "id": "U28",
       "outcome": {
@@ -436,7 +436,7 @@
       "category": "Defense",
       "role": "flex",
       "value": 10,
-      "copies": 2,
+      "copies": 3,
       "icon": "Scale",
       "color": "yellow",
       "effect": "React: cancel Patent Lawsuit, Steal Customer or Cease & Desist. Or use 1 card play to remove 1 pending Lawsuit from you or your partner. Discard this.",
@@ -487,7 +487,7 @@
       "category": "Defense",
       "role": "flex",
       "value": 10,
-      "copies": 3,
+      "copies": 4,
       "icon": "ShieldCheck",
       "color": "yellow",
       "effect": "React: cancel Founder Scandal or PR Crisis. Or use 1 card play to remove 1 active PR Crisis from you or your partner. Discard this.",
@@ -533,20 +533,20 @@
       }
     },
     {
-      "key": "joint-venture",
-      "name": "Joint Venture",
+      "key": "strategic-alliance",
+      "name": "Strategic Alliance",
       "category": "Partnership",
       "role": "partnership",
       "value": 10,
       "copies": 5,
       "icon": "Handshake",
       "color": "violet",
-      "effect": "Choose an unpartnered rival who agrees. Each commits 1 unshared Employee. Both count both Employees. Keep this between them as the venture marker. Only 1 partner per player.",
+      "effect": "Choose a willing, unpartnered rival. Keep this between you; no shared valuation. Either ally may spend 1 card play on an agreed 1-for-1 hand trade. You may defend each other. Only 1 partner each.",
       "flavor": "Together, until further notice.",
       "id": "U35",
       "outcome": {
-        "headline": "SHARE 2 EMPLOYEES",
-        "caption": "ONE EACH / BOTH COUNT BOTH"
+        "headline": "ALLY UP & TRADE",
+        "caption": "ONE HAND CARD EACH / BOTH AGREE"
       }
     },
     {
@@ -558,12 +558,12 @@
       "copies": 4,
       "icon": "Swords",
       "color": "coral",
-      "effect": "Take both Employees from your Joint Venture and end it. Your valuation stays the same; your partner loses their shared value. If they block Ditch, they take both instead. Discard this.",
+      "effect": "Take 1 banked card from your partner's startup into yours. End the alliance. Golden Handcuffs reverses the theft: they take 1 of your banked cards instead. Discard this.",
       "flavor": "Nothing personal. Extremely personal.",
       "id": "U36",
       "outcome": {
-        "headline": "TAKE BOTH EMPLOYEES",
-        "caption": "END THE VENTURE / PARTNER LOSES SHARED VALUE"
+        "headline": "DITCH & STEAL 1",
+        "caption": "TAKE 1 BANKED CARD / END THE ALLIANCE"
       }
     },
     {
@@ -614,7 +614,7 @@
       "copies": 1,
       "icon": "Users",
       "color": "paper",
-      "effect": "Joint Venture: 1 Employee each; both count both. Ditch succeeds: attacker keeps both. Ditch blocked by Golden Handcuffs: defender keeps both. Either way, the venture ends.",
+      "effect": "Strategic Alliance: both agree; keep separate scores. Spend 1 card play on an agreed 1-for-1 hand trade. Ditch: steal 1 banked card and end the alliance. Golden Handcuffs reverses the theft.",
       "flavor": "Trust is a temporary arrangement.",
       "id": "U40"
     }

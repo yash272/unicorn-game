@@ -207,3 +207,62 @@ test("Scandal reveals privately through the API and transfers only the chosen ca
   assert.deepEqual((await clients[target].request(path)).data.hand,original.slice(0,-1));
   assert.equal(stolen.players[actor].valuation,50);
 });
+
+test("alliance trades need both players' agreement and expose only the two offers to partners", async () => {
+  const clients=Array.from({length:3},client);
+  const created=await clients[0].request('/api/game',{name:'Alliance host'});
+  assert.equal(created.status,201);
+  const path='/api/game/'+created.data.code;
+  for(let i=1;i<3;i++) assert.equal((await clients[i].request(path,{type:'join',name:'Alliance player '+i})).status,200);
+  const move=async(i,command)=>{
+    const v=(await clients[i].request(path)).data;
+    const r=await clients[i].request(path,{revision:v.revision,command});
+    assert.equal(r.status,200,JSON.stringify(r.data));return r.data;
+  };
+  await move(0,{type:'start'});
+  const seats=new Map();
+  for(let i=0;i<3;i++) {
+    const v=(await clients[i].request(path)).data;seats.set(v.you,i);
+    await move(i,{type:'choose',key:v.choices[0]});
+  }
+  let actor;
+  for(let turn=0;turn<140;turn++) {
+    const table=(await clients[0].request(path)).data;
+    const i=seats.get(table.turn);let v=await move(i,{type:'draw'});
+    while(v.hand.length>7) {
+      const keep=new Set(v.hand.filter(c=>c.key==='strategic-alliance').map(c=>c.id));
+      v=await move(i,v.moves.find(m=>m.command.type==='discard'&&!keep.has(m.command.cardId))?.command || v.moves.find(m=>m.command.type==='discard').command);
+    }
+    if(v.hand.some(c=>c.key==='strategic-alliance')) {actor=i;break;}
+    await move(i,{type:'end'});
+  }
+  assert.notEqual(actor,undefined);
+  const v=(await clients[actor].request(path)).data;
+  const invitation=v.moves.find(m=>m.command.type==='effect'&&v.hand.find(c=>c.id===m.command.cardId)?.key==='strategic-alliance');
+  assert.ok(invitation);
+  const target=seats.get(invitation.command.targetId),observer=[0,1,2].find(i=>i!==actor&&i!==target);
+  await move(actor,invitation.command);
+  const allied=await move(target,{type:'accept'});
+  assert.equal(allied.alliances.length,1);
+  assert.ok(allied.players.every(p=>p.valuation===50));
+  const a=(await clients[actor].request(path)).data,b=(await clients[target].request(path)).data;
+  const offered=a.hand[0],returned=b.hand[1];
+  await move(actor,{type:'trade',cardId:offered.id,targetId:b.you});
+  const pending=(await clients[target].request(path)).data;
+  assert.equal(pending.trade.offered.id,offered.id);
+  assert.deepEqual(pending.hand,b.hand);
+  const hidden=(await clients[observer].request(path)).data;
+  assert.equal(hidden.trade,undefined);assert.ok(!JSON.stringify(hidden.pending).includes(offered.id));
+  const premature=await clients[actor].request(path,{revision:pending.revision,command:{type:'trade-accept'}});
+  assert.equal(premature.status,400);
+  await move(target,{type:'trade-response',cardId:returned.id});
+  const confirm=(await clients[actor].request(path)).data;
+  assert.equal(confirm.trade.returned.id,returned.id);assert.deepEqual(confirm.hand,a.hand);
+  assert.equal((await clients[observer].request(path)).data.trade,undefined);
+  const swapped=await move(actor,{type:'trade-accept'});
+  assert.deepEqual(swapped.hand,[...a.hand.slice(1),returned]);
+  assert.deepEqual((await clients[target].request(path)).data.hand,[...b.hand.filter(c=>c.id!==returned.id),offered]);
+  assert.equal(swapped.plays,0);assert.equal(swapped.pending,null);
+  assert.ok(swapped.players.every(p=>p.valuation===50));
+  assert.equal(swapped.alliances.length,1);
+});

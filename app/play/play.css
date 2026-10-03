@@ -1054,3 +1054,16 @@
 .reveal-choice { flex: 0 0 180px; display: flex; flex-direction: column; gap: 10px; }
 .reveal-choice img { width: 100%; height: auto; }
 .reveal-choice .online-primary { white-space: normal; font-size: 13px; min-height: 50px; padding: 10px; }
+
+.trade-modal { width: min(1000px, 100%); }
+.trade-modal h2 { font-size: 32px; margin: 12px 0; }
+.trade-modal > p { color: #d4c7df; }
+.trade-offers { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin: 22px 0; }
+.trade-offers > div { display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; min-width: 0; }
+.trade-offers span { font-size: 11px; color: #d4c7df; }
+.trade-offers img { width: min(180px, 100%); border-radius: 8px; }
+.trade-offers p { background: #241a33; padding: 24px; border-radius: 8px; margin: 0; }
+.trade-hand > div { display: flex; overflow-x: auto; gap: 12px; padding-bottom: 16px; }
+.trade-hand img { border-radius: 8px; }
+.trade-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; }
+@media (max-width: 600px) { .trade-modal { padding: 20px; } .trade-modal h2 { font-size: 26px; } .trade-offers { gap: 12px; } }

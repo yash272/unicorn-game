@@ -79,13 +79,13 @@ export default function OnlineTrial() {
     [connected, setConnected] = useState(true);
   const current = useRef<Table | null>(null),
     requesting = useRef(false);
-  const revealing = Boolean(table?.reveal);
+  const revealing = Boolean(table?.reveal || table?.trade);
   useEffect(() => {
     if (!inspect && !showRules && !revealing) return;
     const previous = document.activeElement as HTMLElement | null;
     const overflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    const dialog = document.querySelector<HTMLElement>(".online-modal");
+    const dialog = Array.from(document.querySelectorAll<HTMLElement>(".online-modal")).at(-1);
     const controls = () =>
       Array.from(
         dialog?.querySelectorAll<HTMLElement>(
@@ -127,6 +127,7 @@ export default function OnlineTrial() {
       current.current = data;
       setTable(data);
     }
+    if (data.trade || data.reveal) { setInspect(null); setShowRules(false); }
     setNeedsJoin(false);
     setConnected(true);
   }, []);
@@ -257,7 +258,7 @@ export default function OnlineTrial() {
         m.command.cardId === inspect.id,
     ) || [];
   const shownMoves = (table?.moves || []).filter(
-    (m) => !["bank", "effect", "steal"].includes(m.command.type),
+    (m) => !["bank", "effect", "steal", "trade", "trade-response", "trade-accept"].includes(m.command.type),
   );
   let status = "";
   if (table) {
@@ -275,8 +276,10 @@ export default function OnlineTrial() {
         .join(" · ");
     else if (pending)
       status =
-        pending.kind === "venture"
-          ? `${person(pending.actor)} invited ${person(pending.target)} to partner.`
+        pending.kind === "alliance"
+          ? `${person(pending.actor)} invited ${person(pending.target)} to Strategic Alliance.`
+          : pending.kind === "trade"
+            ? `${person(pending.actor)} and ${person(pending.target)} are considering a private hand trade.`
           : pending.kind === "reveal"
               ? `${person(pending.actor)} is privately choosing a card from ${person(pending.target)}’s hand.`
               : pending.kind === "offer"
@@ -594,36 +597,15 @@ export default function OnlineTrial() {
                   </article>
                 ))}
               </section>
-              {table.ventures.map((v) => (
-                <section className="venture-table" key={v.card.id}>
+              {table.alliances.map((a) => (
+                <section className="venture-table" key={a.card.id}>
                   <div>
-                    <span className="online-eyebrow">JOINT VENTURE</span>
-                    <h3>{v.members.map((m) => person(m.owner)).join(" + ")}</h3>
-                    <p>Both count both Employees. Trust is temporary.</p>
-                    <button onClick={() => setInspect(v.card)}>
-                      Inspect Joint Venture
-                    </button>
+                    <span className="online-eyebrow">STRATEGIC ALLIANCE</span>
+                    <h3>{a.players.map(person).join(" + ")}</h3>
+                    <p>Keep separate valuations. Agree to trade hand cards, or defend your ally.</p>
+                    <button onClick={() => setInspect(a.card)}>Inspect Strategic Alliance</button>
                   </div>
-                  <div className="shared-employees">
-                    {v.members.map((m) => (
-                      <div key={m.card.id}>
-                        <CardFace
-                          card={m.card}
-                          onClick={() => setInspect(m.card)}
-                        />
-                        <span>Contributed by {person(m.owner)}</span>
-                        {m.card.attachments?.map((a) => (
-                          <button
-                            className="attachment-chip"
-                            key={a.id}
-                            onClick={() => setInspect(a)}
-                          >
-                            Protected by Non-Compete
-                          </button>
-                        ))}
-                      </div>
-                    ))}
-                  </div>
+                  <CardFace card={a.card} small onClick={()=>setInspect(a.card)} />
                 </section>
               ))}
               {shownMoves.some((m) =>
@@ -633,8 +615,8 @@ export default function OnlineTrial() {
                   <h3>
                     {table.overflow.some((p) => p.id === table.you)
                       ? "Discard down to seven"
-                      : pending?.kind === "venture"
-                        ? "Choose the Employee you’ll share"
+                      : pending?.kind === "alliance"
+                        ? "Agree to this alliance?"
                         : "Your reaction"}
                   </h3>
                   <div>
@@ -667,7 +649,7 @@ export default function OnlineTrial() {
                       Your hand <span>{table.hand.length}/7</span>
                     </h2>
                   </div>
-                  <p>Click a card to read it, use its effect, or bank it.</p>
+                  <p>Click a card to read it, use it, bank it, or offer it in an allied hand trade.</p>
                   <span className="deck-count">
                     {table.deckCount} in draw pile
                   </span>
@@ -781,6 +763,24 @@ export default function OnlineTrial() {
                 Back to the table
               </button>
             </div>
+          </section>
+        </div>
+      )}
+      {table?.trade && (
+        <div className="online-modal-shade">
+          <section className="online-modal trade-modal" role="dialog" aria-modal="true" aria-label="Private alliance trade">
+            <span className="online-eyebrow">STRATEGIC ALLIANCE · ONLY THE TWO PARTNERS SEE THESE</span>
+            <h2>One card each. Both agree.</h2>
+            <p>These cards stay in your hands until the offering player confirms the swap. An agreed trade uses one of their two card plays and adds no valuation.</p>
+            <div className="trade-offers">
+              <div><span>OFFERED BY {person(table.trade.actor)}</span><img src={`/cards/${table.trade.offered.key}.png`} alt={`${def(table.trade.offered.key).name}: ${def(table.trade.offered.key).effect}`} /></div>
+              <div><span>IN RETURN FROM {person(table.trade.target)}</span>{table.trade.returned?<img src={`/cards/${table.trade.returned.key}.png`} alt={`${def(table.trade.returned.key).name}: ${def(table.trade.returned.key).effect}`} />:<p>Waiting for a card in return.</p>}</div>
+            </div>
+            {table.you===table.trade.target && !table.trade.returned && <div className="trade-hand">
+              <h3>Choose one card from your hand to offer back</h3>
+              <div>{table.hand.map(c=><div className="reveal-choice" key={c.id}><img src={`/cards/${c.key}.png`} alt={`${def(c.key).name}: ${def(c.key).effect}`} /><button className="online-primary" disabled={busy || !table.moves.some(m=>m.command.type==='trade-response'&&m.command.cardId===c.id)} onClick={()=>move({type:'trade-response',cardId:c.id})}>Offer {def(c.key).name}</button></div>)}</div>
+            </div>}
+            <div className="trade-actions">{table.moves.filter(m=>m.command.type==='decline'||m.command.type==='trade-accept').map((m,i)=><button className={m.command.type==='trade-accept'?'online-primary':'online-secondary'} key={i} disabled={busy} onClick={()=>move(m.command)}>{m.label}</button>)}</div>
           </section>
         </div>
       )}
