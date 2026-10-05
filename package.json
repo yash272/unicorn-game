@@ -15,7 +15,10 @@
     "test": "node --experimental-strip-types --test tests/*.test.mjs",
     "test:multiplayer": "node --test tests/multiplayer.integration.mjs",
     "db:migrate:local": "node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 migrations apply DB --local",
-    "deploy": "node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 migrations apply DB --remote && node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js deploy"
+    "deploy": "node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 migrations apply DB --remote && node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js deploy",
+    "leads:export": "node scripts/launch-list.mjs export",
+    "leads:suppress": "node scripts/launch-list.mjs suppress",
+    "funnel:report": "node scripts/launch-list.mjs report"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

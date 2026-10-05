@@ -46,3 +46,7 @@ next-env.d.ts
 /work/
 
 *.tsbuildinfo
+
+# Private mailing-list exports and local visual QA
+/.exports/
+/public/__funnel-review.html

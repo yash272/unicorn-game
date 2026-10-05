@@ -30,7 +30,7 @@ Run `python3 scripts/export-pdfs.py` with ReportLab installed after editing the 
 
 ## Local development
 
-Use Node 22.13 or newer. Run `npm ci`, `npm run db:migrate:local`, then `npm run dev`; the preview runs at http://localhost:5173. The Kickstarter playtest button is deliberately disabled until a campaign link is provided. The site collects no signup data and has no database-backed form.
+Use Node 22.13 or newer. Run `npm ci`, `npm run db:migrate:local`, then `npm run dev`; the preview runs at http://localhost:5173. The prelaunch forms collect email signups in Cloudflare D1 and link directly to the Kickstarter campaign.
 
 Checks: `npm test`, `npx tsc --noEmit`, `npm run lint`, and `npm run build`. With a local preview running, `npm run test:multiplayer` tests five independent sessions through a complete game, including privacy, reconnection and concurrent moves.
 
@@ -42,10 +42,14 @@ Keep the room link and use the same browser to reconnect; an HTTP-only cookie id
 
 ## Cloudflare / GitHub deployment
 
-`wrangler.jsonc` names the existing `unicorn-game` Worker and its `DB` binding. This database stores multiplayer rooms only; the disabled Kickstarter button and removed signup form stay as they are.
+`wrangler.jsonc` names the existing `unicorn-game` Worker and its `DB` binding. This database stores multiplayer rooms, launch-list signups and first-party funnel events in separate tables.
 
 The existing Cloudflare Workers Builds integration builds `main` after a GitHub push. Build command: `npm run build`. Recommended deploy command: `npm run deploy`, which applies the checked-in D1 migrations before uploading the Worker. The first room-table migration has been applied to the configured Cloudflare database. For a manual release, sign in with `npx wrangler login`, then run `npm run build` and `npm run deploy`.
 
 For another Cloudflare account, create a D1 database, replace its ID in `wrangler.jsonc`, and apply the migration. The database ID is configuration, not a credential.
 
 Sites hosting is configured by `.openai/hosting.json`. Build and publish using the installed Sites tooling while preserving the existing audience. GitHub origin remains `https://github.com/yash272/unicorn-game.git`.
+
+## Kickstarter prelaunch funnel
+
+The landing page collects real launch-list signups in the existing Cloudflare D1 database. See [prelaunch operations](docs/PRELAUNCH.md) for storage, CSV exports, campaign reporting, launch-email sending, and the mobile test checklist. Deploy with `npm run deploy` so the additive signup migration is applied first.

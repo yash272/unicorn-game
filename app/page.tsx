@@ -4,6 +4,8 @@ import { flushSync } from 'react-dom';
 import { ArrowUpRight, ArrowRight, Clock3, Users, Sparkles, FlaskConical, Gavel, Rocket, ShieldCheck, LockKeyhole, HandCoins, FileSignature, Megaphone, BrainCircuit, ShoppingBag, CreditCard, Dna, Eye, EyeOff, Swords, Repeat2, MessageCircle, RotateCcw, ChevronDown, BriefcaseBusiness, Handshake, Siren, Download, type LucideIcon } from 'lucide-react';
 import catalog from '../game/cards.json';
 import rules from '../game/rules.json';
+import { ContextSignup, FunnelTracking, LaunchSignup, PlaytestProof, PrivacyNote, StickyLaunchBar } from '../components/launch-funnel';
+import { focusSignup } from '../lib/funnel-client';
 import { cardInfo, freshTable, resolveDemo, scenarios, valueOf, type Scenario, type Stage } from '../game/demo';
 
 const iconMap: Record<string, LucideIcon> = { FlaskConical, Gavel, Rocket, ShieldCheck, LockKeyhole, HandCoins, FileSignature, Megaphone, BrainCircuit, ShoppingBag, CreditCard, Dna, Handshake, Swords, Siren, Users };
@@ -12,10 +14,11 @@ const downloadRoot = '/downloads/';
 
 export default function Home() {
   return <>
-    <header className="site-header wrap"><a className="brand" href="#" aria-label="UNICORN home"><Sparkles fill="currentColor"/> UNICORN<span>™</span></a><nav aria-label="Main navigation"><a href="#how-it-works">How to play</a><a href="#cards">The cards</a><a href="#playtest" className="nav-cta">Join the playtest <ArrowUpRight size={16}/></a></nav></header>
+    <FunnelTracking/>
+    <header className="site-header wrap"><a className="brand" href="#" aria-label="UNICORN home"><Sparkles fill="currentColor"/> UNICORN<span>™</span></a><nav aria-label="Main navigation"><a href="#how-it-works">How to play</a><a href="#cards">The cards</a><a href="#playtest" className="nav-cta" onClick={e=>{e.preventDefault();focusSignup('nav')}}>Get launch alert <ArrowUpRight size={16}/></a></nav></header>
     <main>
-      <section className="hero wrap">
-        <div className="hero-copy"><div className="eyebrow"><span className="tiny-star">✳</span> BIG AMBITIONS. QUESTIONABLE FRIENDSHIPS.</div><h1>BUILD. RAISE.<br/>HIRE. <span>ATTACK.</span></h1><h2>First startup to <strong>$1B</strong> wins.</h2><p>Build the next big thing. Partner up. Ditch them.<br className="desktop-br"/> Try to stay friends after game night.</p><div className="hero-actions"><a href="/play" className="button lime">Play online trial <ArrowUpRight size={20}/></a><a href="#how-it-works" className="text-button">See how it works <ArrowRight size={17}/></a></div><div className="game-meta"><span><Users size={17}/> 3–5 players</span><span><Clock3 size={17}/> ~45 min target</span><span>1 winner</span></div></div>
+      <section className="hero wrap" id="hero">
+        <div className="hero-copy"><div className="eyebrow"><span className="tiny-star">✳</span> BIG AMBITIONS. QUESTIONABLE FRIENDSHIPS.</div><h1 className="funnel-headline">Build a billion-dollar startup.<br/><span>Betray your friends along the way.</span></h1><div className="game-meta funnel-meta"><span><Users size={16}/> 3–5 Players</span><span><Clock3 size={16}/> ~45 Minutes</span><span>First to $1B Wins</span></div><LaunchSignup location="hero"/><a href="#how-it-works" className="hero-how">See how it works <ArrowRight size={15}/></a></div>
         <div className="hero-deck" aria-label="Startup cards surrounding the one billion dollar Unicorn card">
           <div className="orbit orbit-one"/><div className="orbit orbit-two"/>
           <div className="hero-card scientist"><div className="card-top">EMPLOYEE <FlaskConical size={16}/></div><h3>CHIEF<br/>SCIENTIST</h3><FlaskConical className="hero-icon" strokeWidth={1.1}/><div className="card-stat">+$125M<small>IN YOUR STARTUP</small></div></div>
@@ -26,9 +29,16 @@ export default function Home() {
         </div>
       </section>
       <div className="ticker"><div>BUILD YOUR EMPIRE <Sparkles/> BETRAY YOUR COFOUNDER <Sparkles/> BECOME A UNICORN <Sparkles/> REQUEST A REMATCH <Sparkles/></div></div>
-      <HowItWorks/><CardCollection/><GameDemo/><WhyPlay/><Startups/><PlaytestQuotes/><PlaytestForm/>
+      <HowItWorks/>
+      <ContextSignup location="how-to-play" title="Think you can build the first $1B startup?"/>
+      <CardCollection/><GameDemo/>
+      <ContextSignup location="betrayal" title="Ready to destroy some friendships?" label="Notify me at launch" eyebrow="KEEP YOUR FRIENDS CLOSE. YOUR DEFENSE CARDS CLOSER."/>
+      <WhyPlay/><PlaytestProof/>
+      <ContextSignup location="playtest" title="Your game night could be next." eyebrow="BRING 2–4 FRIENDS. LEAVE YOUR BUSINESS ETHICS AT THE DOOR."/>
+      <Startups/><PlaytestForm/><PrivacyNote/>
     </main>
-    <footer className="footer wrap"><a className="brand" href="#"><Sparkles fill="currentColor"/> UNICORN<span>™</span></a><p>Big dreams. Small cards. Questionable ethics.</p><span>VALUATION-ONLY EDITION · 2026</span></footer>
+    <footer className="footer wrap"><a className="brand" href="#"><Sparkles fill="currentColor"/> UNICORN<span>™</span></a><p>Big dreams. Small cards. Questionable ethics.</p><span>COMING TO KICKSTARTER · 2026</span></footer>
+    <StickyLaunchBar/>
   </>;
 }
 const steps = [
@@ -40,6 +50,8 @@ const steps = [
 ];
 function HowItWorks(){return <section id="how-it-works" className="section wrap how-section">
   <div className="section-heading"><div><div className="eyebrow">THE 60-SECOND PITCH</div><h2 className="section-title">One number to chase.<br/><span>Several friends to betray.</span></h2></div><p className="section-copy">Draw one. Play up to two.<br/>The rules are simple.<br/>The people at your table aren’t.</p></div>
+  <div className="quick-play" aria-label="The game in ten seconds"><span><Repeat2/>DRAW <b>1 CARD</b></span><ArrowRight aria-hidden="true"/><span><span className="quick-number">2</span>PLAY UP TO <b>2 CARDS</b></span><ArrowRight aria-hidden="true"/><span><Swords/>BUILD <b>OR ATTACK</b></span><ArrowRight aria-hidden="true"/><span><Sparkles/>FIRST STARTUP <b>TO $1B WINS</b></span></div>
+  <div className="online-trial-link"><a href="/play" className="text-button">Play online trial <ArrowUpRight size={17}/></a><span>Or keep scrolling for a table full of bad decisions.</span></div>
   <div className="steps">{steps.map((s,i)=><div className="step" key={s.title}><div className="step-number">0{i+1}<s.icon size={24}/></div><h3>{s.title}</h3><p>{s.description}</p></div>)}</div>
   <div className="accounting valuation-only"><div className="accounting-intro"><span className="eyebrow">ONLY VALUATION MATTERS</span><h3>Your cards are your score.<br/>Your hand is your leverage.</h3><p>Lasting effects stay on the table, where everyone can count them.</p></div><div className="number-rule"><span>BUILD YOUR STARTUP</span><strong>+$125M</strong><p>Bank Chief Scientist face-up.<br/>Its valuation is now yours.</p></div><div className="number-rule tactic-rule"><span>OR KEEP YOUR OPTIONS</span><strong>+$10M</strong><p>Bank a defense for a small boost—or keep it hidden to save your company.</p></div></div>
   <details className="rules-details"><summary>The rest fits on a card. <span>Peek at the rules <ChevronDown size={18}/></span></summary><div className="rule-content"><div><h4>One card, one use</h4><p>Bank it for its printed valuation, or use its effect. A banked card cannot use its effect later. Used tactics do not also add their bank value.</p></div><div><h4>Keep the reactions ready</h4><p>Defenses come from your hand at the moment you’re attacked. They don’t use either of your two card plays. A partner may defend you, but never has to.</p></div><div><h4>A visible reminder</h4><p>PR Crisis stays beside a startup as a −$75M penalty. Patent Lawsuit stays until the next turn is skipped. Add visible values, subtract penalties, and keep building.</p></div></div><div className="rule-content rule-content-extra"><div><h4>Investor</h4><p>Give the other player the +$50M Investor card. Take one random card from their hidden hand. Not For Sale can stop the exchange.</p></div><div><h4>Strategic Alliance</h4><p>Both agree to ally up. An agreed one-for-one hand trade uses one card play. A declined offer costs nothing. Your startup cards and valuation remain yours.</p></div><div><h4>Ditch</h4><p>Take one banked card from your ally and end the alliance. Golden Handcuffs reverses it: your ally chooses one of your banked cards to take instead.</p></div></div></details>
@@ -103,5 +115,4 @@ function Startups(){const startups=catalog.cards.filter(c=>c.role==='startup');r
   <details className="rules-details complete-rules"><summary>Settle the table debate. <span>Complete gameplay rules <ChevronDown size={18}/></span></summary><div className="full-rules-grid">{rules.blocks.map(b=><div key={b.title}><h4>{b.title}</h4>{b.paragraphs.map(p=><p key={p}>{p}</p>)}</div>)}</div></details>
   <div className="downloads"><a href={downloadRoot+'UNICORN-individual-cards.pdf'} className="text-button" download><Download size={18}/> Every card, one per page</a><a href={downloadRoot+'UNICORN-printable-deck.pdf'} className="text-button" download><Download size={18}/> 98-card deck + 20 startup / reference cards</a></div>
 </section>}
-function PlaytestQuotes(){return <section className="quotes-section"><div className="wrap"><div className="quote-label">OVERHEARD AT YOUR FUTURE GAME NIGHT <span>DEMO QUOTES · NOT REAL TESTIMONIALS</span></div><div className="quotes"><blockquote>“WE WERE<br/><em>PARTNERS.</em>”</blockquote><blockquote>“You tried to ditch me.<br/><em>I took your CTO.</em>”</blockquote><blockquote>“Again.”<span>THE INEVITABLE REMATCH.</span></blockquote></div></div></section>}
-function PlaytestForm(){return <section id="playtest" className="section wrap playtest-section"><div className="playtest-copy"><span className="prototype-pill"><Sparkles size={14}/> EARLY PROTOTYPE. BIG POTENTIAL.</span><h2 className="section-title">Your friends.<br/>Your startup.<br/><span>Your villain era.</span></h2><p>We’re building UNICORN, and the first table<br className="desktop-br"/> could be yours. Get in early. Play a part.</p><div className="signup-aside"><Users size={20}/><span>Bring 2–4 friends.<br/><strong>Leave your business ethics at the door.</strong></span></div><p className="prototype-timing">About 45 minutes is the design target. This edition’s timing and balance still need live playtesting.</p></div><div className="signup-panel"><div className="signup-placeholder"><span className="eyebrow"><Sparkles size={14}/> KICKSTARTER LINK COMING SOON</span><h3>Join the first playtest</h3><p>We’re getting the campaign ready. The Kickstarter link will open here when it’s live.</p><button className="button lime submit-button" type="button" disabled title="Kickstarter link coming soon">Join the first playtest <ArrowUpRight size={20}/></button><p className="form-note">No signup is collected yet. Check back when the campaign launches.</p></div></div></section>}
+function PlaytestForm(){return <section id="playtest" className="section wrap playtest-section"><div className="playtest-copy"><span className="prototype-pill"><Sparkles size={14}/> FIRST EDITION. BIG AMBITIONS.</span><h2 className="section-title">Your friends.<br/>Your startup.<br/><span>Your villain era.</span></h2><p>The first edition of UNICORN is coming to Kickstarter.<br className="desktop-br"/> Join the launch list and be there from day one.</p><div className="signup-aside"><Users size={20}/><span>Bring 2–4 friends.<br/><strong>Leave your business ethics at the door.</strong></span></div></div><div className="signup-panel"><LaunchSignup location="bottom" heading="Get the first-mover advantage." button="Join the launch list"/></div></section>}
