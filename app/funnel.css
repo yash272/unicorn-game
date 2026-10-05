@@ -93,13 +93,15 @@ html { scroll-padding-bottom: 105px; }
   .sticky-launch > div { justify-content: center; gap: 24px; }
 }
 @media (max-width: 480px) {
-  .hero .funnel-headline { font-size: 45px; line-height: 1.02; letter-spacing: -.4px; margin: 15px 0 20px; }
-  .hero > .hero-copy > .eyebrow { font-size: 8px; letter-spacing: 1px; gap: 5px; }
-  .hero .funnel-meta { gap: 9px; font-size: 10px; margin-bottom: 22px; }
+  .site-header { height: 64px; }
+  .hero { min-height: 0; padding-top: 16px; align-content: start; align-items: start; }
+  .hero .funnel-headline { font-size: clamp(30px, 9.2vw, 40px); line-height: 1.02; letter-spacing: -.4px; margin: 0 0 12px; }
+  .hero > .hero-copy > .eyebrow { display: none; }
+  .hero .funnel-meta { gap: 9px; font-size: 10px; margin-bottom: 8px; }
   .hero .funnel-meta span + span { padding-left: 9px; }
   .hero .funnel-meta svg { display: none; }
   .hero .hero-deck {
-    --mobile-deck-scale: .82;
+    --mobile-deck-scale: .44;
     width: 400px;
     max-width: none;
     height: 412px;
@@ -107,11 +109,15 @@ html { scroll-padding-bottom: 105px; }
     justify-self: center;
     margin-left: 0;
     margin-right: 0;
+    margin-top: 4px;
     transform: scale(var(--mobile-deck-scale));
     transform-origin: top center;
-    margin-bottom: calc(28px - 412px * (1 - var(--mobile-deck-scale)));
+    margin-bottom: calc(12px - 412px * (1 - var(--mobile-deck-scale)));
   }
+  .hero .deck-sticker, .hero .deck-note { display: none; }
+  .hero .launch-signup h3 { font-size: 16px; margin-bottom: 8px; }
   .hero .launch-input-row { flex-direction: column; }
+  .hero .launch-input-row input, .hero .launch-input-row .button { min-height: 48px; }
   .launch-signup h3 { font-size: 17px; }
   .launch-note { font-size: 10px; }
   .launch-input-row .button { font-size: 12px; min-height: 50px; }
@@ -137,6 +143,16 @@ html { scroll-padding-bottom: 105px; }
   .sticky-launch .kickstarter-link svg { width: 16px; height: 16px; }
   .funnel-privacy summary span { display: block; margin-left: 0; }
 }
-@media (max-width: 389px) { .hero .hero-deck { --mobile-deck-scale: .76; } }
-@media (max-width: 359px) { .hero .funnel-headline { font-size: 39px; margin: 12px 0; } .hero { padding-top: 16px; } .hero .funnel-meta { font-size: 9px; gap: 8px; } .hero .funnel-meta span + span { padding-left: 8px; } .launch-signup h3 { font-size: 15px; } .hero .funnel-meta { margin-bottom: 12px; } .hero .hero-deck { --mobile-deck-scale: .68; } }
+@media (max-width: 359px) { .hero .funnel-meta { font-size: 9px; gap: 8px; } .hero .funnel-meta span + span { padding-left: 8px; } .hero .launch-signup h3 { font-size: 15px; } }
+/* Short viewports reserve space for the email field and a full-size tap target. */
+@media (max-width: 480px) and (max-height: 650px) {
+  .hero .hero-deck { --mobile-deck-scale: .34; }
+}
+@media (max-width: 480px) and (max-height: 550px) {
+  .site-header { height: 60px; }
+  .hero { padding-top: 10px; }
+  .hero .funnel-headline { font-size: 30px; margin-bottom: 8px; }
+  .hero .funnel-meta { margin-bottom: 4px; }
+  .hero .hero-deck { --mobile-deck-scale: .27; }
+}
 @media (prefers-reduced-motion: reduce) { .sticky-launch, .kickstarter-link { transition: none; } .kickstarter-link:hover { transform: none; } }
