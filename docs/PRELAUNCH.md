@@ -67,7 +67,7 @@ A random visit ID lasts up to 30 minutes in tab-scoped sessionStorage, falling b
 
 1. Visit `https://unicorn-game.yvs272.workers.dev/?utm_source=instagram&utm_medium=paid_social&utm_campaign=qa-funnel&utm_content=mobile-test` on a phone. Also check at 320px, 390px and a desktop width. Email fields use the email keyboard and at least 16px text.
 2. Tap a Kickstarter link before entering any email. It should open the supplied campaign with the UTM tags intact.
-3. Submit a new test email in the hero. Stay on the same page, see “You’re in. 🦄”, and follow the success-state Kickstarter button. This stores an actual QA contact, excluded from export.
+3. Submit a new test email in the hero. Stay on the same page, see “You’re in.”, and follow the success-state Kickstarter button. This stores an actual QA contact, excluded from export.
 4. Submit the same email again, including uppercase. It should succeed without creating another record or completion.
 5. Scroll through the interactive cards and demo. The sticky bar appears beyond the hero and hides around visible forms or an active input. Test a second email using a later CTA and another via the sticky button.
 6. Play the trailer and scroll to the bottom. Check the `funnel_events` table in D1 Studio for the test campaign and the seven requested events plus CTA views. Check `launch_subscribers` for your test addresses and attribution.

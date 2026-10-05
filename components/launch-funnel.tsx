@@ -36,7 +36,7 @@ export function LaunchSignup({ location, heading = 'Get notified when UNICORN la
   }
   return <div ref={panel} className={'launch-signup' + (compact ? ' compact-signup' : '')} data-launch-signup={location}>
     {state === 'success' ? <div className="launch-success" role="status" aria-live="polite">
-      <span className="success-icon"><Check size={22}/></span><h3>You’re in. 🦄</h3>
+      <span className="success-icon"><Check size={22}/></span><h3>You’re in.</h3>
       <p>You’ll be one of the first to know when UNICORN launches.</p>
       <p className="success-next">One more thing: follow UNICORN on Kickstarter so Kickstarter also notifies you the moment we launch.</p>
       <KickstarterLink location={source} className="button lime success-cta">Follow UNICORN on Kickstarter <ArrowUpRight size={19}/></KickstarterLink>
