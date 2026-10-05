@@ -74,7 +74,15 @@ html { scroll-padding-bottom: 105px; }
   .accounting { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
   .accounting-intro, .number-rule { min-width: 0; }
   .hero .funnel-headline { font-size: clamp(45px, 8.1vw, 65px); max-width: 600px; }
-  .hero { padding-top: 30px; }
+  .hero { padding-top: 30px; gap: 0; }
+  /* Let the existing card fan sit between the headline and signup on phones. */
+  .hero-copy { display: contents; }
+  .hero-copy > .eyebrow { order: 0; }
+  .hero .funnel-headline { order: 1; }
+  .hero .funnel-meta { order: 2; }
+  .hero .hero-deck { order: 3; margin-top: 12px; margin-bottom: 36px; }
+  .hero .launch-signup { order: 4; }
+  .hero .hero-how { order: 5; justify-self: start; }
   .context-inner { grid-template-columns: 1fr; gap: 25px; padding: 26px; }
   .context-inner h2 { max-width: 560px; font-size: 40px; }
   .context-signup { padding-bottom: 36px; }
@@ -90,6 +98,19 @@ html { scroll-padding-bottom: 105px; }
   .hero .funnel-meta { gap: 9px; font-size: 10px; margin-bottom: 22px; }
   .hero .funnel-meta span + span { padding-left: 9px; }
   .hero .funnel-meta svg { display: none; }
+  .hero .hero-deck {
+    --mobile-deck-scale: .82;
+    width: 400px;
+    max-width: none;
+    height: 412px;
+    left: auto;
+    justify-self: center;
+    margin-left: 0;
+    margin-right: 0;
+    transform: scale(var(--mobile-deck-scale));
+    transform-origin: top center;
+    margin-bottom: calc(28px - 412px * (1 - var(--mobile-deck-scale)));
+  }
   .hero .launch-input-row { flex-direction: column; }
   .launch-signup h3 { font-size: 17px; }
   .launch-note { font-size: 10px; }
@@ -116,5 +137,6 @@ html { scroll-padding-bottom: 105px; }
   .sticky-launch .kickstarter-link svg { width: 16px; height: 16px; }
   .funnel-privacy summary span { display: block; margin-left: 0; }
 }
-@media (max-width: 359px) { .hero .funnel-headline { font-size: 39px; } .hero { padding-top: 24px; } .hero .funnel-meta { font-size: 9px; gap: 8px; } .hero .funnel-meta span + span { padding-left: 8px; } .launch-signup h3 { font-size: 15px; } .hero .funnel-meta { margin-bottom: 18px; } }
+@media (max-width: 389px) { .hero .hero-deck { --mobile-deck-scale: .76; } }
+@media (max-width: 359px) { .hero .funnel-headline { font-size: 39px; margin: 12px 0; } .hero { padding-top: 16px; } .hero .funnel-meta { font-size: 9px; gap: 8px; } .hero .funnel-meta span + span { padding-left: 8px; } .launch-signup h3 { font-size: 15px; } .hero .funnel-meta { margin-bottom: 12px; } .hero .hero-deck { --mobile-deck-scale: .68; } }
 @media (prefers-reduced-motion: reduce) { .sticky-launch, .kickstarter-link { transition: none; } .kickstarter-link:hover { transform: none; } }
