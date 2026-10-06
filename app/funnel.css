@@ -96,7 +96,8 @@ html { scroll-padding-bottom: 105px; }
   .site-header { height: 64px; }
   .hero { min-height: 0; padding-top: 16px; align-content: start; align-items: start; }
   .hero .funnel-headline { font-size: clamp(30px, 9.2vw, 40px); line-height: 1.02; letter-spacing: -.4px; margin: 0 0 12px; }
-  .hero > .hero-copy > .eyebrow { display: none; }
+  .hero > .hero-copy > .eyebrow { display: flex; font-size: 10px; margin-bottom: 8px; }
+  .hero > .hero-copy > .eyebrow .tiny-star { display: none; }
   .hero .funnel-meta { gap: 9px; font-size: 10px; margin-bottom: 8px; }
   .hero .funnel-meta span + span { padding-left: 9px; }
   .hero .funnel-meta svg { display: none; }

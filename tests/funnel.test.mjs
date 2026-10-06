@@ -57,3 +57,54 @@ test('an explicit new opt-in can reactivate a suppressed address without inflati
   const { sql, post } = fixture(); await post(); sql.exec("UPDATE launch_subscribers SET status='unsubscribed'");
   assert.equal((await post()).status,200); assert.equal(sql.prepare('SELECT status FROM launch_subscribers').get().status,'subscribed'); assert.equal(sql.prepare('SELECT count(*) n FROM funnel_events').get().n,1);
 });
+
+test('every Ivey landing atomically records one poster visit, with canonical attribution', async () => {
+  const {post,data,sql}=fixture();
+  for(const variant of ['build','cto','billion']) {
+    const body={sessionId:crypto.randomUUID(),location:'page',name:'landing_page_view',attribution:{utm_source:'ivey_poster',utm_medium:'offline',utm_campaign:'ivey_launch',utm_content:variant}};
+    assert.equal((await post(body,'event')).status,200);
+    assert.equal((await post(body,'event')).status,200);
+    const row=sql.prepare("SELECT * FROM funnel_events WHERE name='poster_qr_visit' AND utm_content=?").get(variant);
+    assert.equal(row.session_id,body.sessionId);assert.equal(row.utm_campaign,'ivey_launch');assert.equal(row.utm_source,'ivey_poster');
+    assert.equal((await post({...data,sessionId:body.sessionId,attribution:body.attribution,email:`${variant}@example.com`})).status,200);
+    assert.equal(sql.prepare('SELECT utm_content FROM launch_subscribers WHERE email=?').get(`${variant}@example.com`).utm_content,variant);
+  }
+  assert.equal(sql.prepare("SELECT COUNT(*) n FROM funnel_events WHERE name='poster_qr_visit'").get().n,3);
+  assert.equal(sql.prepare("SELECT COUNT(*) n FROM funnel_events WHERE name='landing_page_view'").get().n,3);
+});
+
+test('poster markers require valid attribution and cannot be directly submitted by a client',async()=>{
+  const {post,data,sql}=fixture();
+  const attribution={utm_source:'ivey_poster',utm_medium:'offline',utm_campaign:'ivey_launch',utm_content:'cto'};
+  for(const patch of [{utm_content:'unknown'},{utm_source:'instagram'},{utm_medium:'paid_social'},{utm_campaign:'other'}]) {
+    assert.equal((await post({name:'landing_page_view',location:'page',sessionId:crypto.randomUUID(),attribution:{...attribution,...patch}},'event')).status,200);
+  }
+  assert.equal((await post({name:'poster_qr_visit',location:'page',sessionId:data.sessionId,attribution},'event')).status,400);
+  assert.equal(sql.prepare("SELECT COUNT(*) n FROM funnel_events WHERE name='poster_qr_visit'").get().n,0);
+});
+
+test('rescanning another poster does not steal an existing subscriber attribution or create a new lead',async()=>{
+  const {post,data,sql}=fixture();
+  const attribution={utm_source:'ivey_poster',utm_medium:'offline',utm_campaign:'ivey_launch',utm_content:'build'};
+  await post({...data,attribution});
+  await post({...data,sessionId:crypto.randomUUID(),attribution:{...attribution,utm_content:'cto'}});
+  assert.equal(sql.prepare('SELECT utm_content FROM launch_subscribers').get().utm_content,'build');
+  assert.equal(sql.prepare("SELECT COUNT(*) n FROM funnel_events WHERE name='email_signup_completed'").get().n,1);
+});
+
+test('QA poster funnels work but retain the excluded qa- campaign',async()=>{
+  const {post,data,sql}=fixture();
+  const attribution={utm_source:'ivey_poster',utm_medium:'offline',utm_campaign:'qa-ivey_launch',utm_content:'billion'};
+  await post({name:'landing_page_view',location:'page',sessionId:data.sessionId,attribution},'event');
+  await post({...data,attribution});
+  assert.equal(sql.prepare("SELECT utm_campaign FROM funnel_events WHERE name='poster_qr_visit'").get().utm_campaign,'qa-ivey_launch');
+  assert.equal(sql.prepare("SELECT COUNT(*) n FROM launch_subscribers WHERE utm_campaign NOT LIKE 'qa-%'").get().n,0);
+});
+
+test('a failure writing the poster marker rolls back its landing event',async()=>{
+  const {post,data,sql}=fixture();
+  sql.exec("CREATE TRIGGER fail_marker BEFORE INSERT ON funnel_events WHEN NEW.name='poster_qr_visit' BEGIN SELECT RAISE(ABORT,'test failure'); END");
+  const attribution={utm_source:'ivey_poster',utm_medium:'offline',utm_campaign:'ivey_launch',utm_content:'build'};
+  assert.equal((await post({name:'landing_page_view',location:'page',sessionId:data.sessionId,attribution},'event')).status,503);
+  assert.equal(sql.prepare('SELECT COUNT(*) n FROM funnel_events').get().n,0);
+});

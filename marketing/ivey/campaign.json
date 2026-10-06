@@ -1,0 +1,35 @@
+[
+  {
+    "poster": "A",
+    "variant": "build",
+    "url": "https://www.unicornthegame.com/ivey-build",
+    "pdf": "posters/UNICORN-Ivey-A-Build-A4.pdf",
+    "qr_svg": "qr/ivey-build.svg",
+    "qr_png": "qr/ivey-build.png",
+    "qr_mm": 98.8,
+    "quiet_zone_modules": 4,
+    "error_correction": "M"
+  },
+  {
+    "poster": "B",
+    "variant": "cto",
+    "url": "https://www.unicornthegame.com/ivey-cto",
+    "pdf": "posters/UNICORN-Ivey-B-CTO-A4.pdf",
+    "qr_svg": "qr/ivey-cto.svg",
+    "qr_png": "qr/ivey-cto.png",
+    "qr_mm": 98.8,
+    "quiet_zone_modules": 4,
+    "error_correction": "M"
+  },
+  {
+    "poster": "C",
+    "variant": "billion",
+    "url": "https://www.unicornthegame.com/ivey-billion",
+    "pdf": "posters/UNICORN-Ivey-C-Billion-A4.pdf",
+    "qr_svg": "qr/ivey-billion.svg",
+    "qr_png": "qr/ivey-billion.png",
+    "qr_mm": 98.8,
+    "quiet_zone_modules": 4,
+    "error_correction": "M"
+  }
+]

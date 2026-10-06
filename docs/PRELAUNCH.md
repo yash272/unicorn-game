@@ -102,3 +102,7 @@ Use a distinct `utm_content` for each creative. Run `npm run funnel:report` to c
 ## Release verification (5 October 2026)
 
 The production build passed 43 automated gameplay/signup tests and four real Worker multiplayer integration tests. A browser test page passed 37 checks spanning 320, 360, 390, 412, 768, 1024 and 1440px layouts, a real local D1 signup, duplicate signup, a simulated network failure and recovery, UTM handoff, sticky CTA focus, trailer playback, deferred video loading, decoded photos and the interactive Poach example. The test page is a local-only artifact and is not deployed. TypeScript, lint and the production build also pass. This is browser viewport testing, not a claim of testing physical iPhone/Android hardware.
+
+## Ivey offline experiment
+
+The three permanent `/ivey-build`, `/ivey-cto` and `/ivey-billion` routes redirect to the same homepage with distinct campaign tags. `poster_qr_visit` is derived server-side from the existing landing event. No migration or extra analytics service is needed. Run `npm run ivey:report` for the campaign's A/B/C report, or add `-- --qa` for isolated test traffic. See [the poster kit and experiment instructions](../marketing/ivey/README.md) for printing, placement, metric definitions and repeatable QA.

@@ -50,3 +50,4 @@ next-env.d.ts
 # Private mailing-list exports and local visual QA
 /.exports/
 /public/__funnel-review.html
+__pycache__/

@@ -2,6 +2,7 @@ import { spawnSync } from 'node:child_process';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { iveyReportSql, iveyReportHtml, iveyColumns, reportDate } from '../lib/ivey-report.mjs';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const action = process.argv[2], local = process.argv.includes('--local');
 function query(sql) {
@@ -40,10 +41,26 @@ try {
     console.log('Ad attribution:');
     console.table(query(`SELECT COALESCE(utm_source,'direct') AS source, COALESCE(utm_medium,'') AS medium, COALESCE(utm_campaign,'') AS campaign, COALESCE(utm_content,'') AS creative, COUNT(DISTINCT CASE WHEN name='landing_page_view' THEN session_id END) AS visits, COUNT(DISTINCT CASE WHEN name='email_signup_completed' THEN session_id END) AS signups, COUNT(DISTINCT CASE WHEN name='kickstarter_click' THEN session_id END) AS kickstarter_clicks FROM funnel_events WHERE ${clean} GROUP BY utm_source,utm_medium,utm_campaign,utm_content ORDER BY visits DESC LIMIT 100`));
     console.log('Kickstarter clicks are outbound intent, not verified follows. QA campaigns are excluded.');
+  } else if (action === 'ivey') {
+    const option = name => process.argv.find(arg => arg.startsWith(`--${name}=`))?.slice(name.length + 3);
+    const fromText = option('from'), untilText = option('until');
+    const from = reportDate(fromText, 0), until = reportDate(untilText, Date.now() + 1);
+    const qa = process.argv.includes('--qa');
+    const rows = query(iveyReportSql({ from, until, qa }));
+    const period = `${qa ? 'QA ONLY. ' : ''}${fromText || 'Campaign start'} to ${untilText ? untilText + ' (exclusive)' : 'now'}, UTC. ${local ? 'LOCAL database.' : 'Production database.'}`;
+    console.log(period);
+    console.table(rows.map(row => ({ Variant: row.poster, 'QR visits': row.qr_visits, Starts: row.signup_starts, Emails: row.emails, 'Email CVR': row.email_conversion_percent == null ? 'n.a.' : row.email_conversion_percent+'%', 'KS clicks': row.kickstarter_clicks, 'KS CTR': row.kickstarter_ctr_percent == null ? 'n.a.' : row.kickstarter_ctr_percent+'%' })));
+    const folder = path.join(root, '.exports'); mkdirSync(folder, { recursive: true, mode: 0o700 });
+    const stem = path.join(folder, `ivey-posters-${local ? 'local-' : ''}${qa ? 'qa-' : ''}${new Date().toISOString().replaceAll(':','-')}`);
+    writeFileSync(stem+'.csv', [iveyColumns.join(','), ...rows.map(row => iveyColumns.map(key => csvCell(row[key])).join(','))].join('\r\n')+'\r\n', { mode: 0o600, flag: 'wx' });
+    writeFileSync(stem+'.html', iveyReportHtml(rows, period), { mode: 0o600, flag: 'wx' });
+    console.log(`Open the readable report: ${stem}.html`);
+    console.log(`Spreadsheet export: ${stem}.csv`);
+    console.log('Visits are deduplicated browser sessions, not unique people. Kickstarter clicks are not verified follows.');
   } else if (action === 'suppress') {
     const email = process.argv.find(a => a.startsWith('--email='))?.slice(8).trim().toLowerCase();
     if (!email || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error('Use --email=person@example.com with a valid email.');
     query(`UPDATE launch_subscribers SET status='unsubscribed' WHERE email='${email.replaceAll("'", "''")}'`);
     console.log('Suppression saved. Matching addresses are excluded from future exports. Also suppress the contact in your sending platform.');
-  } else throw new Error('Use export, report, or suppress [--email=person@example.com]. Add --local for development.');
+  } else throw new Error('Use export, report, ivey [--from=YYYY-MM-DD --until=YYYY-MM-DD], or suppress [--email=person@example.com]. Add --local for development.');
 } catch (error) { console.error(error.message); process.exitCode = 1; }

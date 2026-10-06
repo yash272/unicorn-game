@@ -7,25 +7,30 @@ let visit: Visit | undefined;
 const sent = new Set<string>();
 
 export function getVisit() {
-  if (visit) return visit;
   const params = new URLSearchParams(window.location.search);
   const attribution: Record<string, string> = {};
   for (const key of utms) { const value = params.get(key); if (value) attribution[key] = value.slice(0, 150); }
+  const matches = (candidate: Visit) => candidate.expires > Date.now()
+    && (!Object.keys(attribution).length || utms.every(key => candidate.attribution[key] === attribution[key]));
+  if (visit && matches(visit)) return visit;
   try {
     const saved = JSON.parse(sessionStorage.getItem('unicorn-visit-v1') || 'null') as Visit | null;
-    if (saved && saved.expires > Date.now() && (!Object.keys(attribution).length || utms.every(key => saved.attribution[key] === attribution[key]))) return (visit = saved);
+    if (saved && typeof saved.sessionId === 'string' && saved.attribution && matches(saved)) return (visit = saved);
   } catch { /* In-app browsers may disable storage; memory still works. */ }
   try { if (document.referrer) attribution.referrer_host = new URL(document.referrer).hostname; } catch {}
   visit = { sessionId: crypto.randomUUID(), attribution, expires: Date.now() + 30 * 60 * 1000 };
+  sent.clear();
   try { sessionStorage.setItem('unicorn-visit-v1', JSON.stringify(visit)); } catch {}
   return visit;
 }
 
 export function track(name: Event, location: Location = 'page') {
-  const key = `${name}:${location}`;
+  const { sessionId, attribution } = getVisit();
+  // An interaction after the 30-minute visit expires starts a fresh measured visit.
+  if (name !== 'landing_page_view' && !sent.has(`${sessionId}:landing_page_view:page`)) track('landing_page_view');
+  const key = `${sessionId}:${name}:${location}`;
   if (sent.has(key)) return;
   sent.add(key);
-  const { sessionId, attribution } = getVisit();
   // keepalive lets outbound clicks finish recording without delaying navigation.
   void fetch('/api/events', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, location, sessionId, attribution }), keepalive: true })
     .then(response => { if (!response.ok) sent.delete(key); }).catch(() => { sent.delete(key); });

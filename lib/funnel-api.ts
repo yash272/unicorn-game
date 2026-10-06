@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { isIveyPoster } from './ivey-campaign.mjs';
 
 const locations = ['page', 'hero', 'how-to-play', 'betrayal', 'playtest', 'bottom', 'sticky', 'nav'] as const;
 const clientEvents = ['landing_page_view', 'email_signup_started', 'kickstarter_click', 'gameplay_video_play', 'scroll_50', 'scroll_90', 'cta_view'] as const;
@@ -75,8 +76,13 @@ export async function handleFunnel(request: Request, db: D1DatabaseSession, kind
       return json({ ok: true });
     }
     if ('name' in d) {
-      await db.prepare(`INSERT OR IGNORE INTO funnel_events (id, name, session_id, cta_location, created_at, utm_source, utm_medium, utm_campaign, utm_content, utm_term, referrer_host) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-        .bind(crypto.randomUUID(), d.name, d.sessionId, d.location, now, ...values(d.attribution)).run();
+      const insert = (name: string, location: string) => db.prepare(`INSERT OR IGNORE INTO funnel_events (id, name, session_id, cta_location, created_at, utm_source, utm_medium, utm_campaign, utm_content, utm_term, referrer_host) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+        .bind(crypto.randomUUID(), name, d.sessionId, location, now, ...values(d.attribution));
+      if (d.name === 'landing_page_view' && d.location === 'page' && isIveyPoster(d.attribution)) {
+        // A browser-loaded poster arrival, not a redirect hit from a bot or link preview.
+        // Both records succeed together; the existing visit/event index deduplicates reloads.
+        await db.batch([insert(d.name, d.location), insert('poster_qr_visit', 'page')]);
+      } else await insert(d.name, d.location).run();
     }
     return json({ ok: true });
   } catch {
