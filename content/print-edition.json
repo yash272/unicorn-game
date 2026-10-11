@@ -1,0 +1,319 @@
+{
+  "edition": "07",
+  "status": "UNVALIDATED PLAYTEST",
+  "created": "2026-10-10",
+  "players": [
+    3,
+    5
+  ],
+  "goal": 1000,
+  "startingValuation": 50,
+  "startingHand": 5,
+  "drawPerTurn": 1,
+  "playsPerTurn": 2,
+  "handLimit": 7,
+  "mainCount": 64,
+  "physicalCount": 70,
+  "setup": "Deal one Startup per player; set unused Startups aside.",
+  "timingMeasured": false,
+  "balanceValidated": false,
+  "cards": [
+    {
+      "key": "rockstar-cto",
+      "name": "Rockstar CTO",
+      "category": "Employee",
+      "role": "asset",
+      "value": 100,
+      "copies": 10,
+      "icon": "CodeXml",
+      "color": "cyan",
+      "effect": "Place face-up in your startup and add its valuation.",
+      "flavor": "Ships code. Starts arguments.",
+      "id": "U07"
+    },
+    {
+      "key": "viral-launch",
+      "name": "Viral Launch",
+      "category": "Growth",
+      "role": "asset",
+      "value": 150,
+      "copies": 12,
+      "icon": "Rocket",
+      "color": "lime",
+      "effect": "Place face-up in your startup and add its valuation.",
+      "flavor": "The internet has entered the chat.",
+      "tag": "",
+      "id": "U14"
+    },
+    {
+      "key": "major-funding-round",
+      "name": "Major Funding Round",
+      "category": "Funding",
+      "role": "asset",
+      "value": 200,
+      "copies": 10,
+      "icon": "Banknote",
+      "color": "blue",
+      "effect": "Place face-up in your startup and add its valuation.",
+      "flavor": "Zero revenue. Somehow a Series B.",
+      "id": "U18"
+    },
+    {
+      "key": "poach",
+      "name": "Poach",
+      "category": "Attack",
+      "role": "tactic",
+      "value": 10,
+      "copies": 5,
+      "icon": "UserRoundMinus",
+      "color": "coral",
+      "effect": "Take 1 banked card from a rival's startup into yours. You gain its value; they lose it. Do not take a Startup or an active effect. Discard this.",
+      "flavor": "Nice startup. Can we borrow something?",
+      "id": "U21",
+      "outcome": {
+        "headline": "TAKE 1 CARD",
+        "caption": "FROM A RIVAL'S STARTUP"
+      }
+    },
+    {
+      "key": "founder-scandal",
+      "name": "Founder Scandal",
+      "category": "Attack",
+      "role": "tactic",
+      "value": 10,
+      "copies": 4,
+      "icon": "Megaphone",
+      "color": "coral",
+      "effect": "Privately look at every card in 1 rival's hand. Choose 1 to steal into your hand. Only you see the hand. Discard this card.",
+      "flavor": "Your pitch deck leaked. So did the group chat.",
+      "id": "U25",
+      "outcome": {
+        "headline": "CHOOSE & STEAL 1",
+        "caption": "PRIVATELY SEE THEIR WHOLE HAND"
+      }
+    },
+    {
+      "key": "pr-crisis",
+      "name": "PR Crisis",
+      "category": "Attack",
+      "role": "tactic",
+      "value": 10,
+      "copies": 3,
+      "icon": "Siren",
+      "color": "coral",
+      "effect": "Place beside a rival's startup as a -$75M valuation penalty. It stays until removed by Crisis PR Team.",
+      "flavor": "The apology needs an apology.",
+      "activeEffect": "-$75M valuation",
+      "effectValue": -75,
+      "id": "U26",
+      "outcome": {
+        "headline": "-$75M",
+        "caption": "TARGET'S VALUATION WHILE ACTIVE"
+      }
+    },
+    {
+      "key": "patent-lawsuit",
+      "name": "Patent Lawsuit",
+      "category": "Attack",
+      "role": "tactic",
+      "value": 10,
+      "copies": 2,
+      "icon": "Gavel",
+      "color": "coral",
+      "effect": "Place beside a rival's startup. They skip their next entire turn, including the draw, then discard this. Only 1 pending Lawsuit per player.",
+      "flavor": "See you in court. Bring snacks.",
+      "activeEffect": "Skip next turn",
+      "effectValue": 0,
+      "id": "U23",
+      "outcome": {
+        "headline": "SKIP 1 TURN",
+        "caption": "TARGET MISSES THEIR NEXT TURN"
+      }
+    },
+    {
+      "key": "cease-and-desist",
+      "name": "Cease & Desist",
+      "category": "Attack",
+      "role": "tactic",
+      "value": 10,
+      "copies": 2,
+      "icon": "Gavel",
+      "color": "coral",
+      "effect": "Return 1 Viral Launch from a rival's startup to their hand. They discard down to 7 if needed. Best Lawyers in Town can block this. Discard this.",
+      "flavor": "Our lawyers would like a word.",
+      "id": "U27",
+      "outcome": {
+        "headline": "BACK TO HAND",
+        "caption": "RETURN A RIVAL'S VIRAL LAUNCH"
+      }
+    },
+    {
+      "key": "golden-handcuffs",
+      "name": "Golden Handcuffs",
+      "category": "Defense",
+      "role": "reaction",
+      "value": 10,
+      "copies": 5,
+      "icon": "LockKeyhole",
+      "color": "yellow",
+      "effect": "React to a Poach targeting you: cancel it. Discard this and the Poach. The targeted card stays in your startup.",
+      "flavor": "Sorry. They're emotionally vested.",
+      "id": "U28",
+      "outcome": {
+        "headline": "CANCEL POACH",
+        "caption": "KEEP YOUR BANKED CARD"
+      }
+    },
+    {
+      "key": "best-lawyers",
+      "name": "Best Lawyers in Town",
+      "category": "Defense",
+      "role": "reaction",
+      "value": 10,
+      "copies": 3,
+      "icon": "Scale",
+      "color": "yellow",
+      "effect": "React to Patent Lawsuit or Cease & Desist targeting you: cancel it. Discard this and the attack.",
+      "flavor": "Our hourly rate is a power move.",
+      "id": "U29",
+      "outcome": {
+        "headline": "BLOCK AN ATTACK",
+        "caption": "LAWSUIT / CEASE & DESIST"
+      }
+    },
+    {
+      "key": "crisis-pr-team",
+      "name": "Crisis PR Team",
+      "category": "Defense",
+      "role": "flex",
+      "value": 10,
+      "copies": 3,
+      "icon": "ShieldCheck",
+      "color": "yellow",
+      "effect": "React: cancel Founder Scandal or PR Crisis targeting you. Or use 1 card play to remove 1 active PR Crisis from your startup. Discard this.",
+      "flavor": "We're workshopping the apology.",
+      "id": "U32",
+      "outcome": {
+        "headline": "STOP THE CRISIS",
+        "caption": "BLOCK SCANDAL / CANCEL OR CLEAR PR CRISIS"
+      }
+    },
+    {
+      "key": "not-for-sale",
+      "name": "Not For Sale",
+      "category": "Defense",
+      "role": "reaction",
+      "value": 10,
+      "copies": 2,
+      "icon": "CircleSlash",
+      "color": "yellow",
+      "effect": "React: cancel an Investor targeting you. No card changes hands and no valuation is added. Discard this and the Investor.",
+      "flavor": "Respectfully, absolutely not.",
+      "id": "U31",
+      "outcome": {
+        "headline": "BLOCK INVESTOR",
+        "caption": "CANCEL THE ENTIRE EXCHANGE"
+      }
+    },
+    {
+      "key": "investor",
+      "name": "Investor",
+      "category": "Investment",
+      "role": "deal",
+      "value": 50,
+      "copies": 3,
+      "icon": "HandCoins",
+      "color": "violet",
+      "effect": "Give a rival this card face-up for +$50M valuation. Take 1 random card from their hidden hand. They must have a card to exchange. The Investor stays in their startup.",
+      "flavor": "I believed in you. Five minutes ago.",
+      "id": "U34",
+      "outcome": {
+        "headline": "TAKE 1 RANDOM CARD",
+        "caption": "GIVE THE TARGET +$50M VALUATION"
+      }
+    },
+    {
+      "key": "neural-ai",
+      "name": "Neural AI",
+      "category": "Startup",
+      "role": "startup",
+      "value": 50,
+      "copies": 1,
+      "icon": "BrainCircuit",
+      "color": "violet",
+      "effect": "Start at $50M. Deal 1 Startup to each player. Keep it face-up; it cannot be stolen or discarded. All Startup types use the same rules.",
+      "flavor": "We put AI in it. Obviously.",
+      "sector": "AI",
+      "id": "U01"
+    },
+    {
+      "key": "flash-commerce",
+      "name": "Flash Commerce",
+      "category": "Startup",
+      "role": "startup",
+      "value": 50,
+      "copies": 1,
+      "icon": "ShoppingBag",
+      "color": "lime",
+      "effect": "Start at $50M. Deal 1 Startup to each player. Keep it face-up; it cannot be stolen or discarded. All Startup types use the same rules.",
+      "flavor": "Everyone needs this. Probably.",
+      "sector": "Consumer",
+      "id": "U02"
+    },
+    {
+      "key": "finpay",
+      "name": "FinPay",
+      "category": "Startup",
+      "role": "startup",
+      "value": 50,
+      "copies": 1,
+      "icon": "CreditCard",
+      "color": "cyan",
+      "effect": "Start at $50M. Deal 1 Startup to each player. Keep it face-up; it cannot be stolen or discarded. All Startup types use the same rules.",
+      "flavor": "Disrupting the group chat.",
+      "sector": "Fintech",
+      "id": "U03"
+    },
+    {
+      "key": "rocketworks",
+      "name": "RocketWorks",
+      "category": "Startup",
+      "role": "startup",
+      "value": 50,
+      "copies": 1,
+      "icon": "Rocket",
+      "color": "coral",
+      "effect": "Start at $50M. Deal 1 Startup to each player. Keep it face-up; it cannot be stolen or discarded. All Startup types use the same rules.",
+      "flavor": "Our growth is literally vertical.",
+      "sector": "Space",
+      "id": "U04"
+    },
+    {
+      "key": "biotech",
+      "name": "Biotech",
+      "category": "Startup",
+      "role": "startup",
+      "value": 50,
+      "copies": 1,
+      "icon": "Dna",
+      "color": "pink",
+      "effect": "Start at $50M. Deal 1 Startup to each player. Keep it face-up; it cannot be stolen or discarded. All Startup types use the same rules.",
+      "flavor": "One breakthrough away. Always.",
+      "sector": "Biotech",
+      "id": "U05"
+    },
+    {
+      "key": "your-turn",
+      "name": "Your Turn",
+      "category": "Reference",
+      "role": "reference",
+      "value": 0,
+      "copies": 1,
+      "icon": "Repeat2",
+      "color": "paper",
+      "effect": "Draw 1. Play up to 2: bank a card OR use its effect. Keep at most 7 in hand. Add your startup and banked values; subtract active PR Crises. End your turn at $1,000M or more to win.",
+      "flavor": "Two plays. Countless bad decisions.",
+      "id": "U38"
+    }
+  ]
+}

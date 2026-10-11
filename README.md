@@ -1,10 +1,12 @@
 # UNICORN
 
-A startup card game for 3–5 players. Build a company, trade hand cards with an ally, betray a partner, and reach $1B valuation. About 45 minutes is a playtest target, not a measured duration.
+A startup card game for 3–5 players. Build a company, steal cards, defend your startup and reach $1B valuation. About 45 minutes is a playtest target, not a measured duration.
 
-## Edition 04
+The homepage features the latest **64-card physical playtest (Edition 07)**, with real photos, printed card artwork and current downloads. The existing **98-card online prototype (Edition 04)** remains available at `/play` and is identified as an earlier edition before entry. See [the homepage audit and release notes](docs/HOMEPAGE-REFRESH.md).
 
-The current game tracks valuation only. There is no Cash, upkeep, shared market or separate round-event phase. Each player chooses a $50M Startup and receives 5 random cards. On each turn, draw 1 and play up to 2 cards. Immediately discard down to 7 whenever a draw or exchange exceeds the limit.
+## Online prototype: Edition 04
+
+The online prototype tracks valuation only. There is no Cash, upkeep, shared market or separate round-event phase. Each player chooses a $50M Startup and receives 5 random cards. On each turn, draw 1 and play up to 2 cards. Immediately discard down to 7 whenever a draw or exchange exceeds the limit.
 
 Play a card's effect or bank it face-up for its printed valuation. Banked cards cannot activate later. Attacks and defenses bank for $10M. Reactions come from the hand and do not use the two normal card plays. Only one player wins, at the end of their own completed turn.
 

@@ -2,14 +2,14 @@
 /* Static, pre-optimized WebP assets; no runtime image service required. */
 /* eslint-disable @next/next/no-img-element */
 import { useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from 'react';
-import { ArrowUpRight, ArrowRight, Check, Sparkles } from 'lucide-react';
+import { ArrowUpRight, ArrowRight, Check } from 'lucide-react';
 import { focusSignup, getVisit, kickstarter, kickstarterUrl, track, type Location } from '../lib/funnel-client';
 
 export function KickstarterLink({ location, children, className = 'kickstarter-link' }: { location: Location; children?: ReactNode; className?: string }) {
   return <a href={kickstarter} target="_blank" rel="noopener noreferrer" className={className} onClick={event => { event.currentTarget.href = kickstarterUrl(); track('kickstarter_click', location); }}>{children || <>Follow on Kickstarter <ArrowUpRight size={17}/></>}</a>;
 }
 
-export function LaunchSignup({ location, heading = 'Get notified when UNICORN launches', button = 'Get the launch alert', compact = false }: { location: Location; heading?: string; button?: string; compact?: boolean }) {
+export function LaunchSignup({ location, heading = 'Get notified when UNICORN launches', button = 'Get the launch alert', compact = false, showKickstarter = true }: { location: Location; heading?: string; button?: string; compact?: boolean; showKickstarter?: boolean }) {
   const id = useId(), panel = useRef<HTMLDivElement>(null), email = useRef<HTMLInputElement>(null);
   const [state, setState] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
@@ -38,7 +38,7 @@ export function LaunchSignup({ location, heading = 'Get notified when UNICORN la
     {state === 'success' ? <div className="launch-success" role="status" aria-live="polite">
       <span className="success-icon"><Check size={22}/></span><h3>You’re in.</h3>
       <p>You’ll be one of the first to know when UNICORN launches.</p>
-      <p className="success-next">One more thing: follow UNICORN on Kickstarter so Kickstarter also notifies you the moment we launch.</p>
+      <p className="success-next">Now follow UNICORN on Kickstarter. You’ll get a reminder there when we go live, too.</p>
       <KickstarterLink location={source} className="button lime success-cta">Follow UNICORN on Kickstarter <ArrowUpRight size={19}/></KickstarterLink>
       <span className="early-note">Done already? You’re officially early.</span>
     </div> : <>
@@ -51,23 +51,23 @@ export function LaunchSignup({ location, heading = 'Get notified when UNICORN la
         <p className="launch-note" id={id+'-note'}>No spam. Just launch day + major UNICORN updates.</p>
         {state === 'error' && <p className="launch-error" id={id+'-error'} role="alert">{message}</p>}
       </form>
-      <KickstarterLink location={location}/>
+      {showKickstarter && <KickstarterLink location={location}/>}
       <span className="signup-privacy">By signing up, you agree to these emails. Unsubscribe anytime. <a href="#privacy">Privacy</a></span>
     </>}
   </div>;
 }
 
 export function ContextSignup({ location, title, label = 'Get the launch alert', eyebrow = 'THE NEXT BIG THING AT GAME NIGHT' }: { location: Location; title: string; label?: string; eyebrow?: string }) {
-  return <aside className="context-signup wrap"><div className="context-inner"><div><span className="eyebrow"><Sparkles size={15}/>{eyebrow}</span><h2>{title}</h2></div><LaunchSignup location={location} heading="Get in early. Bring your friends." button={label} compact/></div></aside>;
+  return <aside className="context-signup wrap" data-cta-location={location}><div className="context-inner"><div><span className="eyebrow">{eyebrow}</span><h2>{title}</h2></div><div className="context-actions"><KickstarterLink location={location} className="button lime"/><button type="button" className="text-button" onClick={()=>focusSignup(location)}>{label} <ArrowRight size={16}/></button></div></div></aside>;
 }
 
 export function FunnelTracking() {
   useEffect(() => {
     track('landing_page_view');
     const observer = new IntersectionObserver(entries => {
-      for (const entry of entries) if (entry.isIntersecting) track('cta_view', (entry.target.getAttribute('data-launch-signup') || 'nav') as Location);
+      for (const entry of entries) if (entry.isIntersecting) track('cta_view', (entry.target.getAttribute('data-launch-signup') || entry.target.getAttribute('data-cta-location') || 'nav') as Location);
     }, { threshold: .5 });
-    document.querySelectorAll('[data-launch-signup], .nav-cta').forEach(el => observer.observe(el));
+    document.querySelectorAll('[data-launch-signup], [data-cta-location], .nav-cta').forEach(el => observer.observe(el));
     let scheduled = false;
     const measure = () => {
       scheduled = false;
@@ -94,7 +94,9 @@ export function StickyLaunchBar() {
       queued = false;
       const editing = document.activeElement instanceof HTMLInputElement;
       const formVisible = [...document.querySelectorAll<HTMLElement>('[data-launch-signup]')].some(form => { const r = form.getBoundingClientRect(); return r.top < innerHeight - 80 && r.bottom > 100; });
-      const show = hero.getBoundingClientRect().bottom < 0 && !formVisible && !editing;
+      // Give card effects, demo controls and the video the entire viewport.
+      const playing = [...document.querySelectorAll<HTMLElement>('#the-moment, #cards, #real-players, #table')].some(area => { if (area.closest('details:not([open])')) return false; const r = area.getBoundingClientRect(); return r.height > 0 && r.top < innerHeight - 80 && r.bottom > 80; });
+      const show = hero.getBoundingClientRect().bottom < 0 && !formVisible && !editing && !playing;
       setVisible(show);
       if (show) track('cta_view', 'sticky');
     };
@@ -105,13 +107,13 @@ export function StickyLaunchBar() {
     update();
     return () => { window.removeEventListener('scroll', queue); window.removeEventListener('resize', queue); document.removeEventListener('focusin', queue); document.removeEventListener('focusout', queue); };
   }, []);
-  return <div className={'sticky-launch'+(visible ? ' is-visible' : '')} inert={!visible} aria-hidden={!visible}><div><span><Sparkles size={18}/> UNICORN is coming to Kickstarter</span><button type="button" className="button lime" onClick={() => focusSignup('sticky')}>Get launch alert</button><KickstarterLink location="sticky"/></div></div>;
+  return <div className={'sticky-launch'+(visible ? ' is-visible' : '')} inert={!visible} aria-hidden={!visible}><div><span>UNICORN is coming to Kickstarter</span><button type="button" className="button sticky-email" onClick={() => focusSignup('sticky')}>Get launch alert</button><KickstarterLink location="sticky" className="button lime sticky-kickstarter"/></div></div>;
 }
 
 export function PlaytestProof() {
-  return <section className="section wrap playtest-proof" id="real-players"><div className="section-heading"><div><div className="eyebrow">HANDMADE CARDS. VERY REAL BETRAYALS.</div><h2 className="section-title">Tested on<br/><span>real friendships.</span></h2></div><p className="section-copy">UNICORN has already escaped the spreadsheet.<br/><br/>We’ve been putting handmade prototypes in front of real players, watching alliances form, companies grow, and friendships deteriorate exactly as intended.</p></div>
-    <div className="proof-grid"><figure className="proof-video"><video controls playsInline preload="none" poster="/images/playtest/trailer-poster.webp" width="1280" height="720" onPlay={() => track('gameplay_video_play', 'playtest')} aria-label="UNICORN trailer with real playtest footage and creators Yash and Manav"><source src="/videos/unicorn-playtest.mp4" type="video/mp4"/><track kind="captions" src="/videos/unicorn-trailer.vtt" srcLang="en" label="English"/>Your browser cannot play this video.</video><figcaption>Meet the game. Then meet the people making it.</figcaption></figure>
-      <div className="proof-photos"><figure><img src="/images/playtest/at-the-table.webp" width="800" height="600" loading="lazy" decoding="async" alt="Friends gathered around the table playing the handmade UNICORN prototype"/><figcaption>The first prototypes, out in the wild.</figcaption></figure><figure><img src="/images/playtest/handmade-cards.webp" width="800" height="600" loading="lazy" decoding="async" alt="A player considering their hand during a UNICORN playtest"/><figcaption>Everyone has a plan. Until someone plays a card.</figcaption></figure></div></div>
+  return <section className="section wrap playtest-proof" id="real-players"><div className="section-heading"><div><div className="eyebrow">OUT OF OUR HEADS. ONTO THE TABLE.</div><h2 className="section-title">Tested on<br/><span>real friendships.</span></h2></div><p className="section-copy">Hand-cut cards, crowded tables, and people finding out how competitive their friends really are. These are the prototype sessions shaping UNICORN.</p></div>
+    <div className="proof-grid"><figure className="proof-video"><video controls playsInline preload="none" poster="/images/playtest/table-reactions-1200.webp" width="1280" height="720" onPlay={() => track('gameplay_video_play', 'playtest')} aria-label="Play the UNICORN trailer with real prototype sessions and creators Yash and Manav"><source src="/videos/unicorn-playtest.mp4" type="video/mp4"/><track kind="captions" src="/videos/unicorn-trailer.vtt" srcLang="en" label="English"/>Your browser cannot play this video.</video><figcaption>Watch the trailer: the prototype, the players, and the people making it.</figcaption></figure>
+      <div className="proof-photos"><figure><img src="/images/playtest/at-the-table.webp" width="800" height="600" loading="lazy" decoding="async" alt="Friends gathered around the table playing the handmade UNICORN prototype"/><figcaption>The first prototypes, out in the wild.</figcaption></figure><figure><img src="/images/playtest/table-talk.webp" width="800" height="600" loading="lazy" decoding="async" alt="Players leaning into the table with handmade UNICORN cards during a prototype session"/><figcaption>Everyone has a plan. Until someone plays a card.</figcaption></figure></div></div>
   </section>;
 }
 
