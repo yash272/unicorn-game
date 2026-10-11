@@ -69,3 +69,13 @@ Photographs use responsive, compressed WebP files. The phone hero photo is about
 Main files: `app/page.tsx`, `app/tabletop.css`, `app/globals.css`, `app/layout.tsx`, `components/homepage-experience.tsx`, `components/table-demo.tsx`, `components/launch-funnel.tsx`, and `content/print-edition.json`. Assets are in `public/cards/edition-07/`, `public/images/playtest/`, `public/downloads/` and `public/fonts/`. Repeatable browser coverage is in `tests/homepage.browser.mjs`; the existing D1 verification tool remains unchanged.
 
 The original category colors, fonts, logo, card designs, existing gameplay engine, signup backend, consent handling, event schema, UTM handling, poster redirects and Cloudflare deployment configuration are preserved. The older scenario component was extracted and deferred, not deleted.
+
+## Production verification
+
+Published to `main` and verified on `https://www.unicornthegame.com` on 11 October 2026. The homepage release is `fc2607c`; the deferred-poster optimization is `c35d3f2`. Cloudflare Workers Builds reported success for both.
+
+The deployed site passed all eight viewport checks and all six Ivey signup journeys (three variants on two mobile sizes). A read-only query of production D1 confirmed the QA subscriber/event records and their retained poster attribution. The final deployed poster behavior, video event, theft/defense controls, deferred demo, sticky focus, signup failure/retry, scroll events and online lobby passed. Both current PDF downloads return HTTP 200 with `application/pdf`. Test addresses use the reserved `example.com` domain and `qa-*` campaigns, excluded by the existing reporting/export filters.
+
+A cold Chromium comparison with a 390px viewport recorded approximately **460 KB of asset transfer after the refresh versus 471 KB before**. At 1440px it recorded **568 KB versus 472 KB**: the larger real photography makes desktop heavier. Initial JavaScript transfer was approximately **141 KB versus 158 KB**. These are local browser captures of production resource transfer, including browser preloading, excluding the HTML document; they are not field Core Web Vitals or physical-device measurements. The page does not fetch the video before play, and the offscreen trailer poster is deferred.
+
+Repeatable evidence: `work/homepage-qa-mv443ghw/` (production layouts and all six signup flows), `work/homepage-qa-mv449u26/` (final production interactions), and `work/human-refresh-final-verified/` (final screenshots/resource measurement). These local evidence folders are ignored by Git.

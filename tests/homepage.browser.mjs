@@ -148,7 +148,9 @@ try {
   await activeForm.locator('button[type=submit]').click();await activeForm.locator('.launch-success').waitFor();
   await page.locator('footer').scrollIntoViewIfNeeded();
   await page.waitForFunction(()=>scrollY/(document.documentElement.scrollHeight-innerHeight)>.9);
-  await page.waitForTimeout(200);
+  // Scroll tracking is scheduled with requestAnimationFrame; wait for the event,
+  // not a fixed delay that becomes flaky when Chrome is busy decoding media.
+  for (let attempt=0;attempt<50&&!events.some(e=>e.name==='scroll_90');attempt++) await page.waitForTimeout(100);
   for(const name of ['landing_page_view','email_signup_started','gameplay_video_play','scroll_50','scroll_90','cta_view']) assert.ok(events.some(e=>e.name===name),name);
   assert.ok(events.some(e=>e.name==='email_signup_started'&&e.location==='sticky'));
   // The multiplayer lobby still loads its existing implementation.
