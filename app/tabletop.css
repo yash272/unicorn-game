@@ -170,7 +170,7 @@
   .tabletop-home .hero-printed-card { width: 122px; bottom: 4px; }
   .tabletop-home .hero-cto { left: 8px; }
   .tabletop-home .hero-poach { left: 120px; bottom: -6px; }
-  .tabletop-home .table-photo-note { font-size: 19px; bottom: 12px; right: 12px; max-width: 120px; }
+  .tabletop-home .table-photo-note { display: none; font-size: 19px; bottom: 12px; right: 12px; max-width: 120px; }
   .tabletop-home .hero-actions { order: 4; margin: 0 0 17px; gap: 10px 24px; }
   .tabletop-home .hero .launch-signup { order: 5; max-width: none; padding-top: 15px; }
   .tabletop-home .section { padding-top: 60px; padding-bottom: 60px; }
