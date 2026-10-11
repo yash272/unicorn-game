@@ -111,8 +111,18 @@ export function StickyLaunchBar() {
 }
 
 export function PlaytestProof() {
+  const video = useRef<HTMLVideoElement>(null);
+  const [nearVideo, setNearVideo] = useState(false);
+  useEffect(() => {
+    if (!video.current) return;
+    const observer = new IntersectionObserver(entries => {
+      if (entries.some(entry => entry.isIntersecting)) { setNearVideo(true); observer.disconnect(); }
+    }, { rootMargin: '400px' });
+    observer.observe(video.current);
+    return () => observer.disconnect();
+  }, []);
   return <section className="section wrap playtest-proof" id="real-players"><div className="section-heading"><div><div className="eyebrow">OUT OF OUR HEADS. ONTO THE TABLE.</div><h2 className="section-title">Tested on<br/><span>real friendships.</span></h2></div><p className="section-copy">Hand-cut cards, crowded tables, and people finding out how competitive their friends really are. These are the prototype sessions shaping UNICORN.</p></div>
-    <div className="proof-grid"><figure className="proof-video"><video controls playsInline preload="none" poster="/images/playtest/table-reactions-1200.webp" width="1280" height="720" onPlay={() => track('gameplay_video_play', 'playtest')} aria-label="Play the UNICORN trailer with real prototype sessions and creators Yash and Manav"><source src="/videos/unicorn-playtest.mp4" type="video/mp4"/><track kind="captions" src="/videos/unicorn-trailer.vtt" srcLang="en" label="English"/>Your browser cannot play this video.</video><figcaption>Watch the trailer: the prototype, the players, and the people making it.</figcaption></figure>
+    <div className="proof-grid"><figure className="proof-video"><video ref={video} controls playsInline preload="none" poster={nearVideo ? "/images/playtest/table-reactions-1200.webp" : undefined} width="1280" height="720" onPlay={() => track('gameplay_video_play', 'playtest')} aria-label="Play the UNICORN trailer with real prototype sessions and creators Yash and Manav"><source src="/videos/unicorn-playtest.mp4" type="video/mp4"/><track kind="captions" src="/videos/unicorn-trailer.vtt" srcLang="en" label="English"/>Your browser cannot play this video.</video><figcaption>Watch the trailer: the prototype, the players, and the people making it.</figcaption></figure>
       <div className="proof-photos"><figure><img src="/images/playtest/at-the-table.webp" width="800" height="600" loading="lazy" decoding="async" alt="Friends gathered around the table playing the handmade UNICORN prototype"/><figcaption>The first prototypes, out in the wild.</figcaption></figure><figure><img src="/images/playtest/table-talk.webp" width="800" height="600" loading="lazy" decoding="async" alt="Players leaning into the table with handmade UNICORN cards during a prototype session"/><figcaption>Everyone has a plan. Until someone plays a card.</figcaption></figure></div></div>
   </section>;
 }

@@ -64,7 +64,7 @@ The test proves the flows work. It does not prove higher conversion, a measured 
 
 The same eight font faces were converted from TTF to WOFF2: 542,608 bytes became 208,812 bytes (61.5% smaller across the font files). The original TTF files remain as fallbacks and for existing print workflows. The preloaded display face now uses WOFF2. No production dependency was added; local font conversion tooling lives in ignored `work/`.
 
-Photographs use responsive, compressed WebP files. The phone hero photo is about 47 KB. Below-the-fold images are lazy-loaded, the existing video uses `preload="none"`, and the older table demo is imported only when opened. The visible page is server-rendered, with client code limited to existing conversion components and actual interactions. No new tracking vendor or animation library was added.
+Photographs use responsive, compressed WebP files. The phone hero photo is about 47 KB. Below-the-fold images are lazy-loaded, the existing video uses `preload="none"` and its poster is deferred until the video approaches the viewport, and the older table demo is imported only when opened. The visible page is server-rendered, with client code limited to existing conversion components and actual interactions. No new tracking vendor or animation library was added.
 
 Main files: `app/page.tsx`, `app/tabletop.css`, `app/globals.css`, `app/layout.tsx`, `components/homepage-experience.tsx`, `components/table-demo.tsx`, `components/launch-funnel.tsx`, and `content/print-edition.json`. Assets are in `public/cards/edition-07/`, `public/images/playtest/`, `public/downloads/` and `public/fonts/`. Repeatable browser coverage is in `tests/homepage.browser.mjs`; the existing D1 verification tool remains unchanged.
 

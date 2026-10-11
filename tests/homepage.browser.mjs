@@ -57,12 +57,14 @@ try {
       assert.ok(metrics.cardVisible);
     }
     assert.ok(!requests.some(url=>/\.mp4(?:\?|$)/.test(url)),'video must not load before play');
+    assert.equal(await page.locator('#real-players video').getAttribute('poster'),null,'offscreen trailer poster must not download on entry');
     await page.screenshot({path:`${folder}/${viewport.width}-hero.png`});
     // Scroll normally so lazy media actually enters the viewport before screenshots.
     for(const selector of ['#the-moment','#how-it-works','#cards','#real-players','.race-section','#our-story','#playtest']) {
       await page.locator(selector).scrollIntoViewIfNeeded();
       await page.waitForFunction(sel=>[...document.querySelector(sel).querySelectorAll('img')].every(im=>im.complete&&im.naturalWidth>0),selector);
       assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,`${viewport.width}: ${selector} overflow`);
+      if(selector==='#real-players') await page.waitForFunction(()=>!!document.querySelector('#real-players video').poster);
       if([390,1440].includes(viewport.width)) await page.locator(selector).screenshot({path:`${folder}/${viewport.width}-${selector.replace(/[^a-z-]/g,'')}.png`});
     }
     await page.screenshot({path:`${folder}/${viewport.width}-full.png`,fullPage:true});
@@ -108,6 +110,7 @@ try {
   const page=await context.newPage();const events=[];
   page.on('request',r=>{if(r.url().endsWith('/api/events'))events.push(JSON.parse(r.postData()||'{}'));});
   await ready(page,base+'/?utm_source=instagram&utm_medium=paid_social&utm_campaign=qa-homepage-controls&utm_content=social');
+  assert.equal(await page.locator('#real-players video').getAttribute('poster'),null);
   await page.locator('#the-moment').scrollIntoViewIfNeeded();
   await page.waitForFunction(()=>!document.querySelector('.sticky-launch').classList.contains('is-visible'));
   await page.getByRole('button',{name:'Let them play Poach'}).click();
@@ -126,6 +129,7 @@ try {
   await page.locator('.prototype-demo summary').click();
   assert.equal(await page.locator('.prototype-demo details').getAttribute('open'),null);
   await page.locator('#real-players video').scrollIntoViewIfNeeded();
+  await page.waitForFunction(()=>!!document.querySelector('#real-players video').poster);
   await page.locator('#real-players video').evaluate(v=>v.play());
   await page.locator('#real-players video').evaluate(v=>v.pause());
   await page.locator('.race-track').evaluate(el=>el.scrollIntoView({block:'center'}));
